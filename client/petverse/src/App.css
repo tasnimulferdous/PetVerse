@@ -1,0 +1,278 @@
+/* Reset some default styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #e6ecf0; /* Twitter light background */
+  color: #0f1419; /* Twitter dark text */
+}
+
+/* Dashboard container */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Dashboard header */
+.dashboard-header {
+  background-color: #1da1f2;
+  color: white;
+  padding: 15px 30px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+}
+
+/* Dashboard body */
+.dashboard-body {
+  display: flex;
+  flex: 1;
+  background-color: #f5f8fa;
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+  width: 220px;
+  background-color: white;
+  border-right: 1px solid #e1e8ed;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-sidebar li {
+  margin: 15px 0;
+}
+
+.dashboard-sidebar a {
+  color: #1da1f2;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 10px 30px;
+  display: block;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-sidebar a:hover {
+  background-color: #e8f5fd;
+}
+
+/* Main content */
+.dashboard-main {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* New post form */
+.new-post-form {
+  background-color: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 16px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.new-post-textarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid #ccd6dd;
+  border-radius: 12px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.new-post-textarea:focus {
+  outline: none;
+  border-color: #1da1f2;
+  box-shadow: 0 0 5px #1da1f2;
+}
+
+.new-post-button {
+  align-self: flex-end;
+  width: 100px;
+}
+
+/* Feed */
+.feed {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tweet */
+.tweet {
+  background-color: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 16px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+}
+
+.tweet-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #1da1f2;
+}
+
+.tweet-user {
+  font-size: 1rem;
+}
+
+.tweet-timestamp {
+  font-size: 0.85rem;
+  color: #536471;
+}
+
+.tweet-content {
+  font-size: 1rem;
+  color: #0f1419;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-sidebar {
+    width: 60px;
+    padding: 10px 0;
+  }
+
+  .dashboard-sidebar a {
+    font-size: 0;
+    padding: 10px 0;
+  }
+
+  .feed {
+    max-width: 100%;
+    margin: 0 10px;
+  }
+}
+
+/* Login Page Styles */
+.form-container {
+  max-width: 400px;
+  margin: 60px auto;
+  background: white;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(29, 161, 242, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.twitter-style {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f1419;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #1da1f2;
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+.twitter-title {
+  letter-spacing: 0.1em;
+}
+
+.subtitle-button {
+  background-color: transparent;
+  border: none;
+  color: #1da1f2;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  cursor: default;
+  user-select: none;
+}
+
+.message {
+  color: #e0245e;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.twitter-form label {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.twitter-form input[type="email"],
+.twitter-form input[type="password"] {
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1.5px solid #ccd6dd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.twitter-form input[type="email"]:focus,
+.twitter-form input[type="password"]:focus {
+  outline: none;
+  border-color: #1da1f2;
+  box-shadow: 0 0 8px #1da1f2;
+}
+
+.twitter-button {
+  background-color: #1da1f2;
+  color: white;
+  font-weight: 700;
+  padding: 12px 0;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.twitter-button:hover {
+  background-color: #0d8ddb;
+}
+
+.bottom-message {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #536471;
+  text-align: center;
+}
+
+.bottom-link {
+  color: #1da1f2;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: text-decoration 0.3s ease;
+}
+
+.bottom-link:hover {
+  text-decoration: underline;
+}

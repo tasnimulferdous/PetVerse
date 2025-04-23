@@ -1,0 +1,103 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import './App.css';
+
+function Adoption() {
+  const [adoptionPosts, setAdoptionPosts] = useState([]);
+  const [formData, setFormData] = useState({
+    petType: 'cat',
+    description: '',
+    location: '',
+    image: null,
+  });
+  const [message, setMessage] = useState('');
+  const [requestedPosts, setRequestedPosts] = useState([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
+
+  const navigate = useNavigate();
+
+  const fetchRequestedPosts = async () => {
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (!loggedInUser) return;
+    const userObj = JSON.parse(loggedInUser);
+    try {
+      const response = await axios.get(`http://localhost:3000/api/users/${userObj._id}/sent-adoption-requests`);
+      const requestedPostIds = response.data.map(req => req.postId);
+      setRequestedPosts(requestedPostIds);
+    } catch (error) {
+      console.error('Failed to fetch requested posts', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequestedPosts();
+  }, []);
+
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (!loggedInUser) {
+      navigate('/login');
+      return;
+    }
+    fetchAdoptionPosts();
+  }, [navigate]);
+
+  const fetchAdoptionPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/adoption');
+      // Populate user field with user object if needed
+      setAdoptionPosts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch adoption posts', error);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setFormData({ ...formData, image: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (!loggedInUser) {
+      navigate('/login');
+      return;
+    }
+    const userObj = JSON.parse(loggedInUser);
+
+    if (!formData.image) {
+      setMessage('Please select an image.');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('user', userObj._id); // send user id now
+    data.append('petType', formData.petType);
+    data.append('description', formData.description);
+    data.append('location', formData.location);
+    data.append('image', formData.image);
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/adoption', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setMessage('Adoption post created successfully.');
+      setFormData({
+        petType: 'cat',
+        description: '',
+        location: '',
+        image: null,
+      });
+      fetchAdoptionPosts();
+    } catch (error) {
+      console.error('Failed to create adoption post', error);
+      setMessage('Failed to create adoption post.');
+    }
+  };
