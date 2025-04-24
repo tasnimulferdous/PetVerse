@@ -5,6 +5,7 @@ const authRoutes = require('./src/routes/auth');
 const postsRoutes = require('./src/routes/posts');
 const adoptionRoutes = require('./src/routes/adoption');
 const userRequestsRoutes = require('./src/routes/userRequests');
+const adminRoutes = require('./src/admin/routes/adminRoutes');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use('/api', authRoutes);
 app.use('/api', postsRoutes);
 app.use('/api', adoptionRoutes);
 app.use('/api', userRequestsRoutes);
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;

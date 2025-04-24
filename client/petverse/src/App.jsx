@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Signup from './Signup';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import AdminDashboard from './admin/pages/AdminDashboard';
 import Profile from './Profile';
 import Adoption from './Adoption';
 import Notification from './Notification';
@@ -26,10 +27,11 @@ function App() {
         <Route path="/adoption" element={<Adoption />} />
         <Route path="/notifications" element={<Notification />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="*" element={<Signup />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;
