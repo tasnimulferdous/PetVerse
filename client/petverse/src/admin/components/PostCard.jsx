@@ -9,8 +9,6 @@ function PostCard({ post, onDelete }) {
       width: '300px',
       boxShadow: '2px 2px 5px rgba(0,0,0,0.1)'
     }}>
-      <h3>{post.title || 'Untitled Post'}</h3>
-      <p>By: {post.user}</p>
       <p>{post.content || post.description || 'No content available'}</p>
       <button onClick={() => onDelete(post._id)} style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px' }}>
         Delete Post

@@ -57,9 +57,14 @@ function AdminDashboard() {
   };
 
   const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user and all their data?')) {
+      return;
+    }
     try {
       await axios.delete(`http://localhost:3000/api/admin/users/${userId}`);
       setUsers(users.filter(user => user._id !== userId));
+      // Also remove posts of deleted user from state
+      setPosts(posts.filter(post => post.user !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -78,10 +83,33 @@ function AdminDashboard() {
     setSearchTerm(term);
   };
 
+  // Filter users by search term
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Group posts by userId
+  const postsByUser = posts.reduce((acc, post) => {
+    if (!acc[post.user]) {
+      acc[post.user] = [];
+    }
+    acc[post.user].push(post);
+    return acc;
+  }, {});
+
+  // Filter posts by search term (search in title or content)
+  const filteredPostsByUser = {};
+  Object.keys(postsByUser).forEach(userId => {
+    const filteredPosts = postsByUser[userId].filter(post =>
+      (post.title && post.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (post.content && post.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (post.description && post.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    if (filteredPosts.length > 0) {
+      filteredPostsByUser[userId] = filteredPosts;
+    }
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('loggedInUser');
@@ -119,9 +147,19 @@ function AdminDashboard() {
         ))}
       </div>
       <h2>User Posts</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-        {posts.map(post => (
-          <PostCard key={post._id} post={post} onDelete={handleDeletePost} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {Object.keys(filteredPostsByUser).map(userId => (
+          <div key={userId} style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
+{(() => {
+  const user = users.find(u => u._id.toString() === userId);
+  return <h3>Posts by {user ? user.name : userId}</h3>;
+})()}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+              {filteredPostsByUser[userId].map(post => (
+                <PostCard key={post._id} post={post} onDelete={handleDeletePost} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

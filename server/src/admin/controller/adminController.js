@@ -1,5 +1,6 @@
 const User = require('../../models/User');
 const Post = require('../../models/Post');
+const AdoptionPost = require('../../models/AdoptionPost');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -14,8 +15,19 @@ exports.getAllUsers = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
+    // Find user by id
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const username = user.name;
+    // Delete all posts by username
+    await Post.deleteMany({ user: username });
+    // Delete all adoption posts by username
+    await AdoptionPost.deleteMany({ user: username });
+    // Delete user
     await User.findByIdAndDelete(userId);
-    res.json({ message: 'User deleted successfully' });
+    res.json({ message: 'User and related data deleted successfully' });
   } catch (error) {
     console.error('Error deleting user:', error);
     res.status(500).json({ message: 'Internal server error' });
