@@ -80,8 +80,28 @@ router.post('/adoption/:postId/request', async (req, res) => {
     }
 
     // Create notification for post owner
+    // Ensure userId is an ObjectId, not a username string
+    let userObjectId = null;
+    if (post.userId) {
+      userObjectId = post.userId;
+    } else if (post.user) {
+      // post.user is username, find user by name to get ObjectId
+      const user = await User.findOne({ name: post.user });
+      if (user) {
+        userObjectId = user._id;
+      } else {
+        return res.status(400).json({ message: 'Post owner user not found' });
+      }
+    } else {
+      return res.status(400).json({ message: 'Post owner user information missing' });
+    }
+
+    if (!requesterId) {
+      return res.status(400).json({ message: 'RequesterId is required' });
+    }
+
     const notification = new Notification({
-      userId: post.userId || post.user, // Adjust if post.user is userId or username
+      userId: userObjectId,
       requesterId,
       requesterName,
       postId: post._id,
