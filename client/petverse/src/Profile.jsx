@@ -136,32 +136,7 @@ function Profile() {
           Update Profile
         </button>
       </form>
-      <h3 style={{ color: '#333', marginBottom: '15px' }}>Adoption Requests</h3>
-      {adoptionRequests.length === 0 ? (
-        <p>No adoption requests.</p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {adoptionRequests.map(request => (
-            <div key={request._id} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '6px', backgroundColor: '#fff' }}>
-              <div><strong>Requester:</strong> {request.requesterName}</div>
-              <div><strong>Email:</strong> {request.requesterEmail || 'N/A'}</div>
-              <div><strong>Pet Type:</strong> {request.petType}</div>
-              <div><strong>Description:</strong> {request.description}</div>
-              <div><strong>Location:</strong> {request.location}</div>
-              {request.imageUrl && <img src={`http://localhost:3000${request.imageUrl}`} alt="Pet" style={{ maxWidth: '100%', marginTop: '10px', borderRadius: '8px' }} />}
-              <div><strong>Status:</strong> {request.status}</div>
-              {request.status === 'pending' && (
-                <button
-                  onClick={() => approveRequest(request._id)}
-                  style={{ marginTop: '10px', padding: '8px 12px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  Approve
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Removed Adoption Requests section as per request */}
     </div>
   );
 }

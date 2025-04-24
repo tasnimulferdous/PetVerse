@@ -5,6 +5,7 @@ import Login from './Login';
 import Dashboard from './Dashboard';
 import Profile from './Profile';
 import Adoption from './Adoption';
+import Notification from './Notification';
 import './App.css';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Link to="/login" className="nav-link">Login</Link>
         <Link to="/dashboard" className="nav-link">Dashboard</Link>
         <Link to="/adoption" className="nav-link">Adoption</Link>
+        <Link to="/notifications" className="nav-link">Notification</Link>
         <Link to="/profile" className="nav-link">Profile</Link>
       </nav>
       <Routes>
@@ -22,6 +24,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/adoption" element={<Adoption />} />
+        <Route path="/notifications" element={<Notification />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Signup />} />
       </Routes>

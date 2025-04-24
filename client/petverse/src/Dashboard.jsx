@@ -125,6 +125,7 @@ function Dashboard() {
           <ul>
             <li><a href="/adoption">Adoption</a></li>
             <li><a href="#marketplace">Marketplace</a></li>
+            <li><a href="/notifications">Notification</a></li>
             <li><a href="/profile">Profile</a></li>
             <li><button onClick={handleLogout} className="logout-button">Logout</button></li>
           </ul>

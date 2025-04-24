@@ -120,15 +120,16 @@ function Adoption() {
     }
     const userObj = JSON.parse(loggedInUser);
     try {
-      await axios.post(`http://localhost:3000/api/users/${post.user}/adoption-requests`, {
+      await axios.post(`http://localhost:3000/api/adoption/${post._id}/request`, {
         requesterId: userObj._id,
         requesterName: userObj.name,
         petType: post.petType,
         description: post.description,
         location: post.location,
         imageUrl: post.imageUrl,
-        postId: post._id,
       });
+      // Update requestedPosts state to include this post immediately
+      setRequestedPosts(prev => [...prev, post._id]);
       await fetchRequestedPosts();
     } catch (error) {
       console.error('Failed to send adoption request', error);
@@ -170,6 +171,7 @@ function Adoption() {
           <ul>
             <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="#marketplace">Marketplace</a></li>
+            <li><a href="/notifications">Notification</a></li>
             <li><a href="/profile">Profile</a></li>
             <li><button onClick={() => { localStorage.removeItem('loggedInUser'); navigate('/login'); }} className="logout-button">Logout</button></li>
           </ul>

@@ -1,7 +1,10 @@
+// Existing imports
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const AdoptionPost = require('../models/AdoptionPost');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -18,8 +21,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Get all adoption posts with user ID included
-const User = require('../models/User');
-
 router.get('/adoption', async (req, res) => {
   try {
     const { petType, location } = req.query;
@@ -64,6 +65,40 @@ router.post('/adoption', upload.single('image'), async (req, res) => {
     res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create adoption post' });
+  }
+});
+
+// Request adoption for a post and create notification
+router.post('/adoption/:postId/request', async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { requesterId, requesterName, petType, description, location, imageUrl } = req.body;
+
+    const post = await AdoptionPost.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Create notification for post owner
+    const notification = new Notification({
+      userId: post.userId || post.user, // Adjust if post.user is userId or username
+      requesterId,
+      requesterName,
+      postId: post._id,
+      petType,
+      description,
+      location,
+      imageUrl,
+      status: 'pending',
+      timestamp: new Date(),
+    });
+
+    await notification.save();
+
+    res.status(201).json({ message: 'Adoption request sent and notification created' });
+  } catch (error) {
+    console.error('Failed to send adoption request', error);
+    res.status(500).json({ message: 'Failed to send adoption request' });
   }
 });
 
