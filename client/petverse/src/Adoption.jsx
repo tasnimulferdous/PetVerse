@@ -15,6 +15,10 @@ function Adoption() {
   const [requestedPosts, setRequestedPosts] = useState([]);
   const [loadingRequest, setLoadingRequest] = useState(false);
 
+  // New state for filters
+  const [filterPetType, setFilterPetType] = useState('');
+  const [filterLocation, setFilterLocation] = useState('');
+
   const navigate = useNavigate();
 
   const fetchRequestedPosts = async () => {
@@ -45,7 +49,12 @@ function Adoption() {
 
   const fetchAdoptionPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/adoption');
+      // Build query params for filters
+      const params = {};
+      if (filterPetType) params.petType = filterPetType;
+      if (filterLocation) params.location = filterLocation;
+
+      const response = await axios.get('http://localhost:3000/api/adoption', { params });
       setAdoptionPosts(response.data);
     } catch (error) {
       console.error('Failed to fetch adoption posts', error);
@@ -132,6 +141,25 @@ function Adoption() {
     return requestedPosts.includes(postId);
   };
 
+  const deletePost = async (postId) => {
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (!loggedInUser) {
+      alert('Please log in to delete posts.');
+      return;
+    }
+    const userObj = JSON.parse(loggedInUser);
+    try {
+      await axios.delete(`http://localhost:3000/api/adoption/${postId}`, {
+        data: { user: userObj.name },
+      });
+      setAdoptionPosts(adoptionPosts.filter(post => post._id !== postId));
+      alert('Post deleted successfully.');
+    } catch (error) {
+      console.error('Failed to delete post', error);
+      alert('Failed to delete post.');
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -147,6 +175,34 @@ function Adoption() {
           </ul>
         </nav>
         <main className="dashboard-main">
+          {/* Filter section */}
+          <div style={{ marginBottom: '20px', display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <select
+              value={filterPetType}
+              onChange={(e) => setFilterPetType(e.target.value)}
+              style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            >
+              <option value="">All Pet Types</option>
+              <option value="cat">Cat</option>
+              <option value="dog">Dog</option>
+              <option value="bird">Bird</option>
+              <option value="fish">Fish</option>
+              <option value="others">Others</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Filter by Location"
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flexGrow: 1 }}
+            />
+            <button
+              onClick={fetchAdoptionPosts}
+              style={{ padding: '8px 16px', borderRadius: '4px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer' }}
+            >
+              Apply Filters
+            </button>
+          </div>
           {message && <p style={{ color: 'green', marginBottom: '15px' }}>{message}</p>}
           <form onSubmit={handleSubmit} style={{ marginBottom: '30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <label>
@@ -231,6 +287,14 @@ function Adoption() {
                         disabled
                       >
                         Requested
+                      </button>
+                    )}
+                    {post.user === currentUser && (
+                      <button
+                        style={{ marginTop: '10px', marginLeft: '10px', padding: '8px 12px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                        onClick={() => deletePost(post._id)}
+                      >
+                        Delete
                       </button>
                     )}
                   </div>

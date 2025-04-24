@@ -22,7 +22,15 @@ const User = require('../models/User');
 
 router.get('/adoption', async (req, res) => {
   try {
-    const posts = await AdoptionPost.find().sort({ timestamp: -1 });
+    const { petType, location } = req.query;
+    const filter = {};
+    if (petType) {
+      filter.petType = petType;
+    }
+    if (location) {
+      filter.location = { $regex: location, $options: 'i' }; // case-insensitive partial match
+    }
+    const posts = await AdoptionPost.find(filter).sort({ timestamp: -1 });
     // For each post, find the user ID by username
     const postsWithUserId = await Promise.all(posts.map(async (post) => {
       const user = await User.findOne({ name: post.user });
@@ -56,6 +64,32 @@ router.post('/adoption', upload.single('image'), async (req, res) => {
     res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create adoption post' });
+  }
+});
+
+// DELETE an adoption post by ID with ownership verification
+router.delete('/adoption/:id', async (req, res) => {
+  const postId = req.params.id;
+  const { user } = req.body;
+
+  if (!user) {
+    return res.status(400).json({ message: 'User is required for deletion' });
+  }
+
+  try {
+    const post = await AdoptionPost.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Adoption post not found' });
+    }
+
+    if (post.user !== user) {
+      return res.status(403).json({ message: 'You are not authorized to delete this post' });
+    }
+
+    await AdoptionPost.findByIdAndDelete(postId);
+    res.json({ message: 'Adoption post deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete adoption post' });
   }
 });
 
