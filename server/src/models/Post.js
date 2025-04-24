@@ -12,6 +12,7 @@ const postSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
   likes: [{ type: String }], // array of user identifiers who liked the post
   comments: [commentSchema], // array of comments
+  image: { type: String }, // image filename or URL
 });
 
 module.exports = mongoose.model('Post', postSchema);
