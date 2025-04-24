@@ -6,6 +6,7 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
 const ProductSubmission = require('../models/ProductSubmission');
+const PetSellPost = require('../models/PetSellPost');
 const router = express.Router();
 
 // Setup multer for image upload
@@ -570,6 +571,248 @@ router.patch('/product-submissions/:id/review', async (req, res) => {
   } catch (error) {
     console.error('Error reviewing product submission:', error);
     res.status(500).json({ message: 'Failed to review product submission' });
+  }
+});
+
+// PET SELL POST ROUTES
+
+// Submit a pet for selling (requires authentication)
+router.post('/pet-sell-posts', sessionAuth, upload.array('images', 5), async (req, res) => {
+  try {
+    const { name, breed, age, ageUnit, gender, description, price, location, healthStatus, vaccination } = req.body;
+    
+    // Process uploaded images
+    const imageUrls = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    
+    // If no files uploaded but image URLs provided in request body
+    if (imageUrls.length === 0 && req.body.images) {
+      const bodyImages = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+      imageUrls.push(...bodyImages);
+    }
+    
+    if (imageUrls.length === 0) {
+      return res.status(400).json({ message: 'At least one image is required' });
+    }
+    
+    const petPost = new PetSellPost({
+      name,
+      breed,
+      age: Number(age),
+      ageUnit,
+      gender,
+      description,
+      price: Number(price),
+      images: imageUrls,
+      location,
+      healthStatus,
+      vaccination,
+      user: req.user._id,
+      status: 'pending'
+    });
+    
+    const createdPost = await petPost.save();
+    res.status(201).json(createdPost);
+  } catch (error) {
+    console.error('Error submitting pet sell post:', error);
+    res.status(500).json({ message: 'Failed to submit pet for selling' });
+  }
+});
+
+// Get all approved pet sell posts
+router.get('/pet-sell-posts', async (req, res) => {
+  try {
+    const filter = { status: 'approved' };
+    
+    // Optional filtering
+    const { breed, minAge, maxAge, minPrice, maxPrice, gender } = req.query;
+    
+    if (breed) {
+      filter.breed = { $regex: breed, $options: 'i' };
+    }
+    
+    if (minAge || maxAge) {
+      filter.age = {};
+      if (minAge) filter.age.$gte = Number(minAge);
+      if (maxAge) filter.age.$lte = Number(maxAge);
+    }
+    
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+    
+    if (gender && ['male', 'female'].includes(gender)) {
+      filter.gender = gender;
+    }
+    
+    const petPosts = await PetSellPost.find(filter)
+      .sort({ createdAt: -1 })
+      .populate('user', 'name email');
+    
+    res.json(petPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch pet sell posts' });
+  }
+});
+
+// Get single pet sell post by ID
+router.get('/pet-sell-posts/:id', async (req, res) => {
+  try {
+    const petPost = await PetSellPost.findById(req.params.id)
+      .populate('user', 'name email');
+    
+    if (!petPost) {
+      return res.status(404).json({ message: 'Pet sell post not found' });
+    }
+    
+    res.json(petPost);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch pet sell post' });
+  }
+});
+
+// Get user's own pet sell posts
+router.get('/my-pet-sell-posts', sessionAuth, async (req, res) => {
+  try {
+    const petPosts = await PetSellPost.find({ user: req.user._id })
+      .sort({ createdAt: -1 });
+    
+    res.json(petPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch your pet sell posts' });
+  }
+});
+
+// Get all pet sell posts (admin only - includes pending posts)
+router.get('/admin/pet-sell-posts', async (req, res) => {
+  try {
+    const petPosts = await PetSellPost.find()
+      .sort({ createdAt: -1 })
+      .populate('user', 'name email');
+    
+    res.json(petPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch pet sell posts' });
+  }
+});
+
+// Update pet sell post (owner only)
+router.put('/pet-sell-posts/:id', sessionAuth, upload.array('images', 5), async (req, res) => {
+  try {
+    const petPost = await PetSellPost.findById(req.params.id);
+    
+    if (!petPost) {
+      return res.status(404).json({ message: 'Pet sell post not found' });
+    }
+    
+    // Verify ownership
+    if (petPost.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this post' });
+    }
+    
+    // Only allow updates if status is pending or rejected
+    if (petPost.status === 'approved') {
+      return res.status(400).json({ message: 'Cannot update an approved post' });
+    }
+    
+    const { name, breed, age, ageUnit, gender, description, price, location, healthStatus, vaccination } = req.body;
+    
+    // Process newly uploaded images
+    const newImageUrls = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    
+    // Handle existing images
+    let existingImages = [];
+    if (req.body.existingImages) {
+      existingImages = Array.isArray(req.body.existingImages) 
+        ? req.body.existingImages 
+        : [req.body.existingImages];
+    }
+    
+    // Combine existing and new images
+    const allImages = [...existingImages, ...newImageUrls];
+    
+    // Update pet post fields
+    petPost.name = name || petPost.name;
+    petPost.breed = breed || petPost.breed;
+    petPost.age = age ? Number(age) : petPost.age;
+    petPost.ageUnit = ageUnit || petPost.ageUnit;
+    petPost.gender = gender || petPost.gender;
+    petPost.description = description || petPost.description;
+    petPost.price = price ? Number(price) : petPost.price;
+    petPost.location = location || petPost.location;
+    petPost.healthStatus = healthStatus || petPost.healthStatus;
+    petPost.vaccination = vaccination || petPost.vaccination;
+    
+    // Only update images if new ones provided
+    if (allImages.length > 0) {
+      petPost.images = allImages;
+    }
+    
+    // Reset status to pending if it was rejected
+    if (petPost.status === 'rejected') {
+      petPost.status = 'pending';
+      petPost.rejectionReason = null;
+    }
+    
+    const updatedPetPost = await petPost.save();
+    res.json(updatedPetPost);
+  } catch (error) {
+    console.error('Error updating pet sell post:', error);
+    res.status(500).json({ message: 'Failed to update pet sell post' });
+  }
+});
+
+// Approve or reject a pet sell post (admin only)
+router.patch('/pet-sell-posts/:id/review', sessionAuth, adminMiddleware, async (req, res) => {
+  try {
+    const { status, rejectionReason } = req.body;
+    
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+    
+    const petPost = await PetSellPost.findById(req.params.id);
+    
+    if (!petPost) {
+      return res.status(404).json({ message: 'Pet sell post not found' });
+    }
+    
+    petPost.status = status;
+    petPost.reviewedAt = new Date();
+    petPost.reviewedBy = req.user._id;
+    
+    if (status === 'rejected' && rejectionReason) {
+      petPost.rejectionReason = rejectionReason;
+    }
+    
+    await petPost.save();
+    res.json(petPost);
+  } catch (error) {
+    console.error('Error reviewing pet sell post:', error);
+    res.status(500).json({ message: 'Failed to review pet sell post' });
+  }
+});
+
+// Delete pet sell post (owner or admin only)
+router.delete('/pet-sell-posts/:id', sessionAuth, async (req, res) => {
+  try {
+    const petPost = await PetSellPost.findById(req.params.id);
+    
+    if (!petPost) {
+      return res.status(404).json({ message: 'Pet sell post not found' });
+    }
+    
+    // Check if user is owner or admin
+    if (petPost.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' });
+    }
+    
+    await petPost.remove();
+    res.json({ message: 'Pet sell post removed' });
+  } catch (error) {
+    console.error('Error deleting pet sell post:', error);
+    res.status(500).json({ message: 'Failed to delete pet sell post' });
   }
 });
 

@@ -137,6 +137,24 @@ function Dashboard() {
               </a>
             </li>
             <li>
+              <a href="/pet-marketplace">
+                <i className="fas fa-dog" style={{ marginRight: '8px' }}></i>
+                <span>Pet Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/submit-pet-sell-post">
+                <i className="fas fa-plus-circle" style={{ marginRight: '8px' }}></i>
+                <span>Sell a Pet</span>
+              </a>
+            </li>
+            <li>
+              <a href="/my-pet-sell-posts">
+                <i className="fas fa-list" style={{ marginRight: '8px' }}></i>
+                <span>My Pet Posts</span>
+              </a>
+            </li>
+            <li>
               <a href="/notifications">
                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                 <span>Notification</span>
