@@ -177,7 +177,7 @@ function Adoption() {
               </a>
             </li>
             <li>
-              <a href="#marketplace">
+              <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>

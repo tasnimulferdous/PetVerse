@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import { getApiUrl, API_URL } from './apiConfig';
 
 function Notification() {
   const [notifications, setNotifications] = useState([]);
@@ -19,7 +20,7 @@ function Notification() {
 
   const fetchNotifications = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/users/${userId}/notifications`);
+      const response = await axios.get(getApiUrl(`api/users/${userId}/notifications`));
       setNotifications(response.data);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
@@ -28,7 +29,7 @@ function Notification() {
 
   const updateRequestStatus = async (notificationId, status) => {
     try {
-      await axios.patch(`http://localhost:3000/api/users/notifications/${notificationId}/status`, { status });
+      await axios.patch(getApiUrl(`api/users/notifications/${notificationId}/status`), { status });
       setNotifications(notifications.map(n => n._id === notificationId ? { ...n, status } : n));
     } catch (error) {
       console.error(`Failed to update notification status to ${status}`, error);
@@ -64,7 +65,7 @@ function Notification() {
               </a>
             </li>
             <li>
-              <a href="#marketplace">
+              <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>
@@ -95,7 +96,7 @@ function Notification() {
                     <p className="notification-field"><strong>Pet Type:</strong> {notification.petType}</p>
                     <p className="notification-field"><strong>Description:</strong> {notification.description}</p>
                     <p className="notification-field"><strong>Location:</strong> {notification.location}</p>
-                    {notification.imageUrl && <img src={`http://localhost:3000${notification.imageUrl}`} alt="Pet" className="notification-image" />}
+                    {notification.imageUrl && <img src={`${API_URL}${notification.imageUrl}`} alt="Pet" className="notification-image" />}
                     <p className="notification-status"><strong>Status:</strong> {notification.status}</p>
                     {notification.status === 'pending' && (
                       <div className="notification-actions">

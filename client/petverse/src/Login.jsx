@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import './App.css';
+import { apiRequest } from './apiConfig';
 
 function Login() {
   const navigate = useNavigate();
@@ -29,7 +29,8 @@ function Login() {
     if (loginType === 'admin') {
       // Hardcoded admin login
       if (formData.email === 'admin' && formData.password === 'admin123') {
-        localStorage.setItem('loggedInUser', JSON.stringify({ username: 'admin', role: 'admin' }));
+        const adminUser = { _id: 'admin', name: 'Admin', email: 'admin', isAdmin: true };
+        localStorage.setItem('loggedInUser', JSON.stringify(adminUser));
         navigate('/admin/dashboard');
       } else {
         setMessage('Invalid admin credentials');
@@ -38,19 +39,29 @@ function Login() {
     }
     // User login
     try {
-      const response = await axios.post('http://localhost:3000/api/login', formData);
-      setMessage(response.data.message);
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        credentials: 'include' // Important: this tells the browser to include cookies
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      setMessage(data.message);
       // Store user info in localStorage
-      if (response.status === 200 && response.data.user) {
-        localStorage.setItem('loggedInUser', JSON.stringify(response.data.user));
+      if (data.user) {
+        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
         navigate('/dashboard');
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        setMessage(error.response.data.message);
-      } else {
-        setMessage('Login failed. Please try again.');
-      }
+      setMessage(error.message || 'Login failed. Please try again.');
     }
   };
 

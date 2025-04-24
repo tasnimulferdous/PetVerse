@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   favouritePet: { type: String, required: true },
+  isAdmin: { type: Boolean, required: true, default: false },
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   adoptionRequests: [{
     requesterName: { type: String, required: true },
     petType: { type: String, required: true },
@@ -15,7 +17,7 @@ const userSchema = new mongoose.Schema({
     status: { type: String, enum: ['pending', 'approved'], default: 'pending' },
     timestamp: { type: Date, default: Date.now }
   }]
-});
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 

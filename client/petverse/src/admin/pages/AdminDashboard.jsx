@@ -10,10 +10,12 @@ function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pendingSubmissions, setPendingSubmissions] = useState(0);
 
   useEffect(() => {
     fetchUsers();
     fetchPosts();
+    fetchPendingSubmissions();
   }, []);
 
   const fetchUsers = async () => {
@@ -31,6 +33,26 @@ function AdminDashboard() {
       setPosts(response.data);
     } catch (error) {
       console.error('Error fetching posts:', error);
+    }
+  };
+
+  const fetchPendingSubmissions = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/marketplace/product-submissions`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch submissions');
+      }
+
+      const data = await response.json();
+      const pending = data.filter(sub => sub.status === 'pending').length;
+      setPendingSubmissions(pending);
+    } catch (error) {
+      console.error('Error fetching pending submissions:', error);
     }
   };
 
@@ -66,10 +88,29 @@ function AdminDashboard() {
     navigate('/login');
   };
 
+  const navigateToProductReview = () => {
+    navigate('/admin/product-review');
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h1>Admin Dashboard</h1>
-      <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <button onClick={handleLogout}>Logout</button>
+        <button 
+          onClick={navigateToProductReview} 
+          style={{ 
+            backgroundColor: pendingSubmissions > 0 ? '#ff6b6b' : '#4caf50',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Review Product Submissions {pendingSubmissions > 0 && `(${pendingSubmissions})`}
+        </button>
+      </div>
       <SearchBar onSearch={handleSearch} />
       <h2>Registered Users</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>

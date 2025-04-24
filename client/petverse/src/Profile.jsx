@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import { getApiUrl } from './apiConfig';
 
 function Profile() {
   const [profile, setProfile] = useState({
@@ -27,7 +28,7 @@ function Profile() {
 
   const fetchProfile = async (email) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/profile?email=${encodeURIComponent(email)}`);
+      const response = await axios.get(getApiUrl(`api/profile?email=${encodeURIComponent(email)}`));
       setProfile(response.data);
     } catch (error) {
       console.error('Failed to fetch profile', error);
@@ -37,7 +38,7 @@ function Profile() {
 
   const fetchAdoptionRequests = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/users/${userId}/adoption-requests`);
+      const response = await axios.get(getApiUrl(`api/users/${userId}/adoption-requests`));
       setAdoptionRequests(response.data);
     } catch (error) {
       console.error('Failed to fetch adoption requests', error);
@@ -52,7 +53,7 @@ function Profile() {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await axios.put('http://localhost:3000/api/profile', {
+      const response = await axios.put(getApiUrl('api/profile'), {
         email: profile.email,
         name: profile.name,
         favouritePet: profile.favouritePet,
@@ -75,7 +76,7 @@ function Profile() {
     }
     const userObj = JSON.parse(loggedInUser);
     try {
-      await axios.patch(`http://localhost:3000/api/users/${userObj._id}/adoption-requests/${requestId}`);
+      await axios.patch(getApiUrl(`api/users/${userObj._id}/adoption-requests/${requestId}`));
       setAdoptionRequests(adoptionRequests.map(req => req._id === requestId ? { ...req, status: 'approved' } : req));
     } catch (error) {
       console.error('Failed to approve adoption request', error);
@@ -103,7 +104,7 @@ function Profile() {
               </a>
             </li>
             <li>
-              <a href="#marketplace">
+              <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>

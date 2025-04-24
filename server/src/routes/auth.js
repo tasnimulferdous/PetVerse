@@ -56,11 +56,55 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    res.status(200).json({ message: 'Login successful', user: { name: user.name, email: user.email, favouritePet: user.favouritePet } });
+    // Create session data
+    req.session.userId = user._id;
+    req.session.isAuthenticated = true;
+
+    // Create a user object without sensitive data
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      favouritePet: user.favouritePet,
+      isAdmin: user.isAdmin || false
+    };
+
+    res.status(200).json({ message: 'Login successful', user: userResponse });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+// Logout route
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to logout' });
+    }
+    res.clearCookie('connect.sid');
+    res.status(200).json({ message: 'Logout successful' });
+  });
+});
+
+// Get current authenticated user from session
+router.get('/me', (req, res) => {
+  if (!req.session.userId || !req.session.isAuthenticated) {
+    return res.status(401).json({ message: 'Not authenticated' });
+  }
+
+  User.findById(req.session.userId, '-password')
+    .then(user => {
+      if (!user) {
+        req.session.destroy();
+        return res.status(401).json({ message: 'User not found' });
+      }
+      res.json({ user });
+    })
+    .catch(error => {
+      console.error('Get current user error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    });
 });
 
 // Get current user profile

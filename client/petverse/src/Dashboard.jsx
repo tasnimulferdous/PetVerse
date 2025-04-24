@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import { getApiUrl } from './apiConfig';
+import { handleLogout } from './utils/auth';
 
 function Dashboard() {
   const [posts, setPosts] = useState([]);
@@ -37,7 +39,7 @@ function Dashboard() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/posts');
+      const response = await axios.get(getApiUrl('api/posts'));
       setPosts(response.data);
       setFilteredPosts(response.data);
     } catch (error) {
@@ -54,7 +56,7 @@ function Dashboard() {
     if (newPost.trim() === '') return;
 
     try {
-      const response = await axios.post('http://localhost:3000/api/posts', {
+      const response = await axios.post(getApiUrl('api/posts'), {
         user: currentUser,
         content: newPost,
       });
@@ -67,7 +69,7 @@ function Dashboard() {
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post(`http://localhost:3000/api/posts/${postId}/like`, {
+      const response = await axios.post(getApiUrl(`api/posts/${postId}/like`), {
         user: currentUser,
       });
       setPosts(posts.map(post => (post._id === postId ? response.data : post)));
@@ -86,7 +88,7 @@ function Dashboard() {
     if (!commentContent || commentContent.trim() === '') return;
 
     try {
-      const response = await axios.post(`http://localhost:3000/api/posts/${postId}/comment`, {
+      const response = await axios.post(getApiUrl(`api/posts/${postId}/comment`), {
         user: currentUser,
         content: commentContent,
       });
@@ -97,9 +99,8 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
-    navigate('/login');
+  const logout = () => {
+    return handleLogout(navigate);
   };
 
   if (!currentUser) {
@@ -130,7 +131,7 @@ function Dashboard() {
               </a>
             </li>
             <li>
-              <a href="#marketplace">
+              <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>
@@ -148,7 +149,7 @@ function Dashboard() {
               </a>
             </li>
             <li>
-              <button onClick={handleLogout} className="logout-button">
+              <button onClick={logout} className="logout-button">
                 <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
                 <span>Logout</span>
               </button>

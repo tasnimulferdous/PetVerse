@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import { getApiUrl } from './apiConfig';
 
 function Search() {
   const [posts, setPosts] = useState([]);
@@ -31,7 +32,7 @@ function Search() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/posts');
+      const response = await axios.get(getApiUrl('api/posts'));
       setPosts(response.data);
       setFilteredPosts(response.data);
     } catch (error) {
@@ -60,7 +61,7 @@ function Search() {
               </a>
             </li>
             <li>
-              <a href="#marketplace">
+              <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>
