@@ -110,24 +110,49 @@ function Dashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>PetVerse</h1>
-        <div className="search-container" style={{ marginTop: '10px', marginBottom: '20px' }}>
+        <div className="search-container">
           <input
             type="text"
             placeholder="Search posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '100%', padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+            className="search-input"
           />
         </div>
       </header>
       <div className="dashboard-body">
         <nav className="dashboard-sidebar">
           <ul>
-            <li><a href="/adoption">Adoption</a></li>
-            <li><a href="#marketplace">Marketplace</a></li>
-            <li><a href="/notifications">Notification</a></li>
-            <li><a href="/profile">Profile</a></li>
-            <li><button onClick={handleLogout} className="logout-button">Logout</button></li>
+            <li>
+              <a href="/adoption">
+                <i className="fas fa-paw" style={{ marginRight: '8px' }}></i>
+                <span>Adoption</span>
+              </a>
+            </li>
+            <li>
+              <a href="#marketplace">
+                <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
+                <span>Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications">
+                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
+                <span>Notification</span>
+              </a>
+            </li>
+            <li>
+              <a href="/profile">
+                <i className="fas fa-user" style={{ marginRight: '8px' }}></i>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li>
+              <button onClick={handleLogout} className="logout-button">
+                <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
+                <span>Logout</span>
+              </button>
+            </li>
           </ul>
         </nav>
         <main className="dashboard-main">

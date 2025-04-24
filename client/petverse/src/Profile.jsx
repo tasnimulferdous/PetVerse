@@ -83,60 +83,99 @@ function Profile() {
   };
 
   return (
-    <div className="profile-container" style={{ maxWidth: '600px', margin: '40px auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ textAlign: 'center', color: '#333', marginBottom: '20px' }}>Your Profile</h2>
-      {message && <p style={{ textAlign: 'center', color: '#007bff', marginBottom: '20px' }}>{message}</p>}
-      <form onSubmit={handleSubmit} className="profile-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
-        <label style={{ fontWeight: 'bold', color: '#555' }}>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={profile.name}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-        </label>
-        <label style={{ fontWeight: 'bold', color: '#555' }}>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            disabled
-            style={{ width: '100%', padding: '8px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#e9ecef' }}
-          />
-        </label>
-        <label style={{ fontWeight: 'bold', color: '#555' }}>
-          Phone:
-          <input
-            type="text"
-            name="phone"
-            value={profile.phone}
-            disabled
-            style={{ width: '100%', padding: '8px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#e9ecef' }}
-          />
-        </label>
-        <label style={{ fontWeight: 'bold', color: '#555' }}>
-          Favourite Pet:
-          <input
-            type="text"
-            name="favouritePet"
-            value={profile.favouritePet}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
-        </label>
-        <button
-          type="submit"
-          style={{ padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Update Profile
-        </button>
-      </form>
-      {/* Removed Adoption Requests section as per request */}
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>Your Profile</h1>
+      </header>
+      <div className="dashboard-body">
+        <nav className="dashboard-sidebar">
+          <ul>
+            <li>
+              <a href="/dashboard">
+                <i className="fas fa-home" style={{ marginRight: '8px' }}></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="/adoption">
+                <i className="fas fa-paw" style={{ marginRight: '8px' }}></i>
+                <span>Adoption</span>
+              </a>
+            </li>
+            <li>
+              <a href="#marketplace">
+                <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
+                <span>Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications">
+                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
+                <span>Notification</span>
+              </a>
+            </li>
+            <li>
+              <button onClick={() => { localStorage.removeItem('loggedInUser'); navigate('/login'); }} className="logout-button">
+                <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
+                <span>Logout</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <main className="dashboard-main">
+          <div className="profile-container">
+            <h2 className="profile-title">Your Profile</h2>
+            {message && <p className="profile-message">{message}</p>}
+            <form onSubmit={handleSubmit} className="profile-form">
+              <label className="profile-label">
+                Name:
+                <input
+                  type="text"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleChange}
+                  required
+                  className="profile-input"
+                />
+              </label>
+              <label className="profile-label">
+                Email:
+                <input
+                  type="email"
+                  name="email"
+                  value={profile.email}
+                  disabled
+                  className="profile-input profile-input-disabled"
+                />
+              </label>
+              <label className="profile-label">
+                Phone:
+                <input
+                  type="text"
+                  name="phone"
+                  value={profile.phone}
+                  disabled
+                  className="profile-input profile-input-disabled"
+                />
+              </label>
+              <label className="profile-label">
+                Favourite Pet:
+                <input
+                  type="text"
+                  name="favouritePet"
+                  value={profile.favouritePet}
+                  onChange={handleChange}
+                  required
+                  className="profile-input"
+                />
+              </label>
+              <button type="submit" className="profile-submit-button">
+                Update Profile
+              </button>
+            </form>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

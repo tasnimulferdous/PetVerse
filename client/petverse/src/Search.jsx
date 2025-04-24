@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import './App.css';
 
 function Search() {
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (!loggedInUser) {
+      navigate('/login');
+      return;
+    }
     fetchPosts();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -32,27 +40,77 @@ function Search() {
   };
 
   return (
-    <div className="search-container" style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Search Posts</h2>
-      <input
-        type="text"
-        placeholder="Search posts..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ width: '100%', padding: '10px', fontSize: '1rem', marginBottom: '20px', borderRadius: '4px', border: '1px solid #ccc' }}
-      />
-      <div className="search-results">
-        {filteredPosts.length === 0 ? (
-          <p>No posts found.</p>
-        ) : (
-          filteredPosts.map(post => (
-            <div key={post._id} style={{ borderBottom: '1px solid #ddd', padding: '10px 0' }}>
-              <div style={{ fontWeight: 'bold' }}>{post.user}</div>
-              <div>{post.content}</div>
-              <div style={{ fontSize: '0.8rem', color: '#666' }}>{new Date(post.timestamp).toLocaleString()}</div>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>Search Posts</h1>
+      </header>
+      <div className="dashboard-body">
+        <nav className="dashboard-sidebar">
+          <ul>
+            <li>
+              <a href="/dashboard">
+                <i className="fas fa-home" style={{ marginRight: '8px' }}></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="/adoption">
+                <i className="fas fa-paw" style={{ marginRight: '8px' }}></i>
+                <span>Adoption</span>
+              </a>
+            </li>
+            <li>
+              <a href="#marketplace">
+                <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
+                <span>Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications">
+                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
+                <span>Notification</span>
+              </a>
+            </li>
+            <li>
+              <a href="/profile">
+                <i className="fas fa-user" style={{ marginRight: '8px' }}></i>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li>
+              <button onClick={() => { localStorage.removeItem('loggedInUser'); navigate('/login'); }} className="logout-button">
+                <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
+                <span>Logout</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <main className="dashboard-main">
+          <div className="search-page-container">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search posts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
             </div>
-          ))
-        )}
+            <div className="search-results">
+              {filteredPosts.length === 0 ? (
+                <p className="no-results">No posts found.</p>
+              ) : (
+                filteredPosts.map(post => (
+                  <div key={post._id} className="search-result-item">
+                    <div className="search-result-user">{post.user}</div>
+                    <div className="search-result-content">{post.content}</div>
+                    <div className="search-result-timestamp">{new Date(post.timestamp).toLocaleString()}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
