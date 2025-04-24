@@ -54,3 +54,25 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// New methods for Adoption Posts
+exports.getAllAdoptionPosts = async (req, res) => {
+  try {
+    const adoptionPosts = await AdoptionPost.find({});
+    res.json(adoptionPosts);
+  } catch (error) {
+    console.error('Error fetching adoption posts:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.deleteAdoptionPost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    await AdoptionPost.findByIdAndDelete(postId);
+    res.json({ message: 'Adoption post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting adoption post:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
