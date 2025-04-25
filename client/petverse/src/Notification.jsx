@@ -36,12 +36,44 @@ function Notification() {
     }
   };
 
-  const approveRequest = (notificationId) => {
-    updateRequestStatus(notificationId, 'approved');
+  const approveRequest = async (notificationId) => {
+    try {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        console.error('No logged in user found');
+        return;
+      }
+      const userObj = JSON.parse(loggedInUser);
+
+      // First update the notification status
+      await updateRequestStatus(notificationId, 'approved');
+      
+      // Then delete the adoption post
+      const notification = notifications.find(n => n._id === notificationId);
+      if (notification && notification.postId) {
+        await axios.delete(getApiUrl(`api/adoption/${notification.postId}`), {
+          data: { user: userObj.name }
+        });
+        // Remove the notification from the list after successful deletion
+        // setNotifications(notifications.filter(n => n._id !== notificationId));
+      }
+    } catch (error) {
+      console.error('Failed to approve request and delete post', error);
+    }
   };
 
   const denyRequest = (notificationId) => {
     updateRequestStatus(notificationId, 'denied');
+  };
+
+  const deleteNotification = async (notificationId) => {
+    try {
+      await axios.delete(getApiUrl(`api/users/notifications/${notificationId}`));
+      // Remove the notification from the list
+      setNotifications(notifications.filter(n => n._id !== notificationId));
+    } catch (error) {
+      console.error('Failed to delete notification', error);
+    }
   };
 
   return (
@@ -92,28 +124,35 @@ function Notification() {
               <ul className="notification-list">
                 {notifications.map(notification => (
                   <li key={notification._id} className={`notification-item notification-${notification.status}`}>
-                    <p className="notification-field"><strong>Requester:</strong> {notification.requesterName}</p>
                     <p className="notification-field"><strong>Pet Type:</strong> {notification.petType}</p>
-                    <p className="notification-field"><strong>Description:</strong> {notification.description}</p>
-                    <p className="notification-field"><strong>Location:</strong> {notification.location}</p>
+                    <p className="notification-field"><strong>Requester:</strong> {notification.requesterName}</p>
+                    <p className="notification-field"><strong>Adoption Reason:</strong> {notification.description}</p>
                     {notification.imageUrl && <img src={`${API_URL}${notification.imageUrl}`} alt="Pet" className="notification-image" />}
                     <p className="notification-status"><strong>Status:</strong> {notification.status}</p>
-                    {notification.status === 'pending' && (
-                      <div className="notification-actions">
-                        <button
-                          onClick={() => approveRequest(notification._id)}
-                          className="approve-button"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => denyRequest(notification._id)}
-                          className="deny-button"
-                        >
-                          Deny
-                        </button>
-                      </div>
-                    )}
+                    <div className="notification-actions">
+                      {notification.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => approveRequest(notification._id)}
+                            className="approve-button"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => denyRequest(notification._id)}
+                            className="deny-button"
+                          >
+                            Deny
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => deleteNotification(notification._id)}
+                        className="delete-button"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -14,6 +14,9 @@ function Adoption() {
   const [message, setMessage] = useState('');
   const [requestedPosts, setRequestedPosts] = useState([]);
   const [loadingRequest, setLoadingRequest] = useState(false);
+  const [requestDescription, setRequestDescription] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   // New state for filters
   const [filterPetType, setFilterPetType] = useState('');
@@ -49,15 +52,29 @@ function Adoption() {
 
   const fetchAdoptionPosts = async () => {
     try {
+      console.log('Fetching adoption posts...');
       // Build query params for filters
       const params = {};
       if (filterPetType) params.petType = filterPetType;
       if (filterLocation) params.location = filterLocation;
 
+      console.log('Request params:', params);
       const response = await axios.get('http://localhost:3000/api/adoption', { params });
+      console.log('Response data:', response.data);
+      
+      if (!response.data || !Array.isArray(response.data)) {
+        console.error('Invalid response format:', response.data);
+        return;
+      }
+      
       setAdoptionPosts(response.data);
+      console.log('Adoption posts updated:', response.data.length, 'posts');
     } catch (error) {
-      console.error('Failed to fetch adoption posts', error);
+      console.error('Failed to fetch adoption posts:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      }
     }
   };
 
@@ -81,7 +98,8 @@ function Adoption() {
     const userObj = JSON.parse(loggedInUser);
 
     if (!formData.image) {
-      setMessage('Please select an image.');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
       return;
     }
 
@@ -96,7 +114,8 @@ function Adoption() {
       const response = await axios.post('http://localhost:3000/api/adoption', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setMessage('Adoption post created successfully.');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
       setFormData({
         petType: 'cat',
         description: '',
@@ -106,7 +125,8 @@ function Adoption() {
       fetchAdoptionPosts();
     } catch (error) {
       console.error('Failed to create adoption post', error);
-      setMessage('Failed to create adoption post.');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
     }
   };
   
@@ -125,15 +145,21 @@ function Adoption() {
         requesterId: userObj._id,
         requesterName: userObj.name,
         petType: post.petType,
-        description: post.description,
+        description: requestDescription,
         location: post.location,
         imageUrl: post.imageUrl,
+        requestDescription: requestDescription,
       });
       // Update requestedPosts state to include this post immediately
       setRequestedPosts(prev => [...prev, post._id]);
+      setRequestDescription('');
       await fetchRequestedPosts();
+      setMessage('Adoption request sent successfully!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Failed to send adoption request', error);
+      setMessage('Failed to send adoption request. Please try again.');
+      setTimeout(() => setMessage(''), 3000);
     } finally {
       setLoadingRequest(false);
     }
@@ -146,7 +172,8 @@ function Adoption() {
   const deletePost = async (postId) => {
     const loggedInUser = localStorage.getItem('loggedInUser');
     if (!loggedInUser) {
-      alert('Please log in to delete posts.');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
       return;
     }
     const userObj = JSON.parse(loggedInUser);
@@ -155,15 +182,29 @@ function Adoption() {
         data: { user: userObj.name },
       });
       setAdoptionPosts(adoptionPosts.filter(post => post._id !== postId));
-      alert('Post deleted successfully.');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error('Failed to delete post', error);
-      alert('Failed to delete post.');
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
     }
   };
 
   return (
     <div className="dashboard-container">
+      {showSuccess && (
+        <div className="success-message-adoption-post">
+          <i className="fas fa-check-circle"></i>
+          <span>Post created successfully!</span>
+        </div>
+      )}
+      {showError && (
+        <div className="success-message-adoption-post" style={{ backgroundColor: '#ff6b6b' }}>
+          <i className="fas fa-exclamation-circle"></i>
+          <span>Please select an image</span>
+        </div>
+      )}
       <header className="dashboard-header">
         <h1>Adoption Posts</h1>
       </header>
@@ -299,16 +340,26 @@ function Adoption() {
                     {post.imageUrl && <img src={`http://localhost:3000${post.imageUrl}`} alt="Pet" className="pet-image" />}
                     <div className="post-actions">
                       {showRequestButton && !hasRequested(post._id) && (
-                        <button
-                          className="request-button"
-                          onClick={() => {
-                            console.log('Request Adoption button clicked for post:', post._id);
-                            requestAdoption(post);
-                          }}
-                          disabled={loadingRequest}
-                        >
-                          Request Adoption
-                        </button>
+                        <div className="request-form">
+                          <textarea
+                            placeholder="Tell the owner why you want to adopt this pet..."
+                            value={requestDescription}
+                            onChange={(e) => setRequestDescription(e.target.value)}
+                            className="request-description"
+                            required
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              console.log('Request Adoption button clicked for post:', post._id);
+                              requestAdoption(post);
+                            }}
+                            disabled={loadingRequest || !requestDescription.trim()}
+                            className="request-button"
+                          >
+                            {loadingRequest ? 'Requesting...' : 'Request Adoption'}
+                          </button>
+                        </div>
                       )}
                       {showRequestButton && hasRequested(post._id) && (
                         <button className="requested-button" disabled>
