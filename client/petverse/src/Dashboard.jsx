@@ -293,6 +293,12 @@ const handleDeleteComment = async (postId, commentId) => {
               </a>
             </li>
             <li>
+              <a href="/my-submissions">
+                <i className="fas fa-box" style={{ marginRight: '8px' }}></i>
+                <span>My Product Submissions</span>
+              </a>
+            </li>
+            <li>
               <a href="/notifications">
                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                 <span>Notification</span>

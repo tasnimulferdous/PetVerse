@@ -158,7 +158,7 @@ const Marketplace = () => {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Pet Marketplace</h1>
+        <h1>Product Marketplace</h1>
         <div className="marketplace-header-actions">
           <button 
             onClick={() => navigate('/submit-product')} 

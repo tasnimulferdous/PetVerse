@@ -764,7 +764,7 @@ router.put('/pet-sell-posts/:id', sessionAuth, upload.array('images', 5), async 
 });
 
 // Approve or reject a pet sell post (admin only)
-router.patch('/pet-sell-posts/:id/review', sessionAuth, adminMiddleware, async (req, res) => {
+router.patch('/pet-sell-posts/:id/review', async (req, res) => {
   try {
     const { status, rejectionReason } = req.body;
     
@@ -780,7 +780,6 @@ router.patch('/pet-sell-posts/:id/review', sessionAuth, adminMiddleware, async (
     
     petPost.status = status;
     petPost.reviewedAt = new Date();
-    petPost.reviewedBy = req.user._id;
     
     if (status === 'rejected' && rejectionReason) {
       petPost.rejectionReason = rejectionReason;
@@ -795,7 +794,7 @@ router.patch('/pet-sell-posts/:id/review', sessionAuth, adminMiddleware, async (
 });
 
 // Delete pet sell post (owner or admin only)
-router.delete('/pet-sell-posts/:id', sessionAuth, async (req, res) => {
+router.delete('/pet-sell-posts/:id', async (req, res) => {
   try {
     const petPost = await PetSellPost.findById(req.params.id);
     
