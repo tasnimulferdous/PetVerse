@@ -301,7 +301,7 @@ router.delete('/cart/:userId', async (req, res) => {
 // ORDER ROUTES
 
 // Create new order
-router.post('/orders', async (req, res) => {
+router.post('/orders', sessionAuth, async (req, res) => {
   try {
     const {
       orderItems,
@@ -311,8 +311,9 @@ router.post('/orders', async (req, res) => {
       taxPrice,
       shippingPrice,
       totalPrice,
-      userId
     } = req.body;
+    
+    const userId = req.user._id;
     
     if (orderItems && orderItems.length === 0) {
       return res.status(400).json({ message: 'No order items' });
@@ -815,4 +816,32 @@ router.delete('/pet-sell-posts/:id', async (req, res) => {
   }
 });
 
-module.exports = router; 
+/**
+ * Get orders for products/pets owned by the authenticated user
+ * Returns orders where orderItems.product is owned by the user
+ */
+router.get('/my-orders', sessionAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find products owned by user
+    const userProducts = await Product.find({ user: userId }).select('_id');
+    const userProductIds = userProducts.map(p => p._id);
+
+    // Find pet sell posts owned by user
+    const userPetPosts = await PetSellPost.find({ user: userId }).select('_id');
+    const userPetPostIds = userPetPosts.map(p => p._id);
+
+    // Find orders containing these products or pet posts
+    const orders = await Order.find({
+      'orderItems.product': { $in: [...userProductIds, ...userPetPostIds] }
+    }).sort({ createdAt: -1 }).populate('user', 'name email');
+
+    res.json(orders);
+  } catch (error) {
+    console.error('Failed to fetch orders for user products/pets:', error);
+    res.status(500).json({ message: 'Failed to fetch orders for your products/pets' });
+  }
+});
+
+module.exports = router;

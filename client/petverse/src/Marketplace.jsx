@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
+import axios from 'axios';
+import BuyRequestForm from './components/BuyRequestForm';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +15,8 @@ const Marketplace = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOption, setSortOption] = useState('');
+  const [showBuyForm, setShowBuyForm] = useState(false);
+  const [buyProduct, setBuyProduct] = useState(null);
   const navigate = useNavigate();
 
   // Fetch products
@@ -97,6 +101,59 @@ const Marketplace = () => {
     } catch (error) {
       console.error('Error adding to cart:', error);
       alert('Failed to add to cart. Please try again.');
+    }
+  };
+
+  const handleBuyClick = (product) => {
+    setBuyProduct(product);
+    setShowBuyForm(true);
+  };
+
+  const handleBuyFormClose = () => {
+    setShowBuyForm(false);
+    setBuyProduct(null);
+  };
+
+  const handleBuyFormSubmit = async (formData) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('loggedInUser'));
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      const orderData = {
+        userId: user._id || user.id,
+        orderItems: [
+          {
+            name: buyProduct.name,
+            qty: 1,
+            image: buyProduct.image,
+            price: buyProduct.price,
+            product: buyProduct._id,
+          },
+        ],
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country,
+        },
+        paymentMethod: 'Direct',
+        taxPrice: 0,
+        shippingPrice: 0,
+        totalPrice: buyProduct.price,
+        isPaid: false,
+        isDelivered: false,
+      };
+
+      await axios.post(getApiUrl('api/marketplace/orders'), orderData, { withCredentials: true });
+      alert('Buy request submitted successfully');
+      setShowBuyForm(false);
+      setBuyProduct(null);
+    } catch (error) {
+      console.error('Error submitting buy request:', error);
+      alert('Failed to submit buy request');
     }
   };
 
@@ -231,36 +288,37 @@ const Marketplace = () => {
             <div className="error-message">{error}</div>
           ) : (
             <div className="products-grid">
-              {getFilteredAndSortedProducts().length === 0 ? (
-                <div className="no-products">No products found.</div>
-              ) : (
-                getFilteredAndSortedProducts().map((product) => (
-                  <div key={product._id} className="product-card">
-                    <div className="product-image">
-                      <img src={product.image} alt={product.name} />
-                    </div>
-                    <div className="product-info">
-                      <h3>{product.name}</h3>
-                      <p className="product-price">TK {product.price.toFixed(2)}</p>
-                      <p className="product-brand">{product.brand}</p>
-                      <div className="product-actions">
-                        <button
-                          onClick={() => addToCart(product)}
-                          className={`cart-button ${isInCart(product._id) ? 'in-cart' : ''}`}
-                          disabled={product.countInStock === 0}
-                        >
-                          {product.countInStock === 0 ? 'Out of Stock' : 
-                           isInCart(product._id) ? 'In Cart' : 'Buy'}
-                        </button>
-                      </div>
+              {getFilteredAndSortedProducts().map((product) => (
+                <div key={product._id} className="product-card">
+                  <div className="product-image">
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-info">
+                    <h3>{product.name}</h3>
+                    <p className="product-price">TK {product.price.toFixed(2)}</p>
+                    <p className="product-brand">{product.brand}</p>
+                    <div className="product-actions">
+                      <button
+                        onClick={() => handleBuyClick(product)}
+                        className="buy-button"
+                      >
+                        Buy
+                      </button>
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           )}
         </main>
       </div>
+      {showBuyForm && buyProduct && (
+        <BuyRequestForm
+          product={buyProduct}
+          onClose={handleBuyFormClose}
+          onSubmit={handleBuyFormSubmit}
+        />
+      )}
     </div>
   );
 };
