@@ -32,7 +32,7 @@ Ensure you have the following installed:
 
    ```bash
    git clone https://github.com/tasnimulferdous/Meow.git
-   cd Meow
+   cd PetVerse
    ```
 
 2. **Install dependencies for the server:**
@@ -72,7 +72,7 @@ The frontend will typically run on `http://localhost:3000`, and the backend API 
 ## Project Structure
 
 ```
-Meow/
+PetVerse/
 ├── client/         # React frontend application
 ├── server/         # Node.js/Express backend API
 ├── tmp.js          # Temporary or test script
