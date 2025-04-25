@@ -1,4 +1,4 @@
-# Meow: PetVerse 🐾
+# PetVerse 🐾
 
 **PetVerse** is a web application designed for cat enthusiasts to explore various cat breeds, view images, and learn interesting facts about them. The project is structured with a React-based frontend and a Node.js/Express backend.
 
