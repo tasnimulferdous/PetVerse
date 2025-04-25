@@ -321,7 +321,7 @@ function SubmitPetSellPost() {
                   
                   <div className="form-row">
                     <div className="form-group" style={{ width: '47.5%', marginRight: '5%' }}>
-                      <label htmlFor="price">Price ($)*</label>
+                      <label htmlFor="price">Price (TK)*</label>
                       <input
                         type="number"
                         id="price"

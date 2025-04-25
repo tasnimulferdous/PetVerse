@@ -36,11 +36,11 @@ function App() {
           <i className={`fas ${menuOpen ? 'fa-times' : 'fa-bars'}`}></i>
         </button>
         <nav className={`nav-bar ${menuOpen ? 'nav-open' : ''}`}>
-          <Link to="/signup" className="nav-link" onClick={() => setMenuOpen(false)}>Signup</Link>
-          <Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link>
+          {/* <Link to="/signup" className="nav-link" onClick={() => setMenuOpen(false)}>Signup</Link> */}
+          {/* <Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link> */}
           <Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>Dashboard</Link>
           <Link to="/adoption" className="nav-link" onClick={() => setMenuOpen(false)}>Adoption</Link>
-          <Link to="/marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Marketplace</Link>
+          <Link to="/marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Product Marketplace</Link>
           <Link to="/pet-marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Pet Marketplace</Link>
           <Link to="/notifications" className="nav-link" onClick={() => setMenuOpen(false)}>Notification</Link>
           <Link to="/profile" className="nav-link" onClick={() => setMenuOpen(false)}>Profile</Link>
@@ -55,7 +55,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/adoption" element={<Adoption />} />
         <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/marketplace/cart" element={<MarketplaceCart />} />
         <Route path="/marketplace/checkout" element={<MarketplaceCheckout />} />
         <Route path="/marketplace/order/:id" element={<MarketplaceOrder />} />
         <Route path="/submit-product" element={<SubmitProduct />} />

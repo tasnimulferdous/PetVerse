@@ -100,38 +100,6 @@ const Marketplace = () => {
     }
   };
 
-  // Add to wishlist
-  const addToWishlist = async (productId) => {
-    try {
-      const user = JSON.parse(localStorage.getItem('loggedInUser'));
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await fetch(getApiUrl('api/marketplace/wishlist'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user._id || user.id}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          productId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add to wishlist');
-      }
-
-      alert('Product added to wishlist!');
-    } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add to wishlist. Please try again.');
-    }
-  };
-
   // Filter and sort products
   const getFilteredAndSortedProducts = () => {
     let filteredProducts = [...products];
@@ -141,8 +109,6 @@ const Marketplace = () => {
       filteredProducts.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       filteredProducts.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'rating') {
-      filteredProducts.sort((a, b) => b.rating - a.rating);
     } else if (sortOption === 'newest') {
       filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
@@ -166,12 +132,6 @@ const Marketplace = () => {
           >
             <i className="fas fa-plus"></i> Submit Product
           </button>
-          <div className="marketplace-cart-icon">
-            <a href="/marketplace/cart">
-              <i className="fas fa-shopping-cart"></i>
-              {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
-            </a>
-          </div>
         </div>
       </header>
       
@@ -260,7 +220,6 @@ const Marketplace = () => {
                 <option value="">Default</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
                 <option value="newest">Newest Arrivals</option>
               </select>
             </div>
@@ -282,16 +241,7 @@ const Marketplace = () => {
                     </div>
                     <div className="product-info">
                       <h3>{product.name}</h3>
-                      <div className="product-rating">
-                        {[...Array(5)].map((_, index) => (
-                          <i
-                            key={index}
-                            className={`fas fa-star ${index < Math.round(product.rating) ? 'filled' : ''}`}
-                          />
-                        ))}
-                        <span>({product.numReviews} reviews)</span>
-                      </div>
-                      <p className="product-price">${product.price.toFixed(2)}</p>
+                      <p className="product-price">TK {product.price.toFixed(2)}</p>
                       <p className="product-brand">{product.brand}</p>
                       <div className="product-actions">
                         <button
@@ -300,13 +250,7 @@ const Marketplace = () => {
                           disabled={product.countInStock === 0}
                         >
                           {product.countInStock === 0 ? 'Out of Stock' : 
-                           isInCart(product._id) ? 'In Cart' : 'Add to Cart'}
-                        </button>
-                        <button 
-                          onClick={() => addToWishlist(product._id)}
-                          className="wishlist-button"
-                        >
-                          <i className="far fa-heart"></i>
+                           isInCart(product._id) ? 'In Cart' : 'Buy'}
                         </button>
                       </div>
                     </div>
@@ -321,4 +265,4 @@ const Marketplace = () => {
   );
 };
 
-export default Marketplace; 
+export default Marketplace;

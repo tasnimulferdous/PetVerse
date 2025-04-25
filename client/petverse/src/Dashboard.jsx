@@ -271,7 +271,7 @@ const handleDeleteComment = async (postId, commentId) => {
             <li>
               <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
-                <span>Marketplace</span>
+                <span>Product Marketplace</span>
               </a>
             </li>
             <li>
