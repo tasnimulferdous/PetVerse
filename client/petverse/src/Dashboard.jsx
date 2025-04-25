@@ -222,7 +222,7 @@ const handleDeleteComment = async (postId, commentId) => {
   if (!window.confirm('Are you sure you want to delete this comment?')) return;
 
   try {
-    await axios.delete(getApiUrl(`api/posts/${postId}/comment/${commentId}`), { data: { user: currentUser } });
+    await axios.delete(getApiUrl(`api/posts/${postId}/comment/${commentId}?user=${encodeURIComponent(currentUser)}`));
     setPosts(posts.map(post => {
       if (post._id === postId) {
         return {
@@ -404,6 +404,7 @@ const handleDeleteComment = async (postId, commentId) => {
 {comment.user === currentUser && (
   <span className="comment-actions">
     <button onClick={() => handleCommentEditClick(comment)} className="edit-comment-button small-button">Edit</button>
+    <button onClick={() => handleDeleteComment(post._id, comment._id)} className="delete-comment-button small-button" style={{ marginLeft: '8px' }}>Delete</button>
   </span>
 )}
                           </>
