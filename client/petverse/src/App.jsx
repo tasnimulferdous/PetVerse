@@ -20,7 +20,6 @@ import AdminPetSellReview from './admin/AdminPetSellReview';
 import AdminPetSellPosts from './AdminPetSellPosts';
 import './App.css';
 
-  const [menuOpen, setMenuOpen] = useState(false);
 
 
 }
