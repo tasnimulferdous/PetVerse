@@ -292,7 +292,7 @@ function Adoption() {
             </li>
             <li>
               <a href="/adopt-message">
-                <i className="fas fa-comments" style={{ marginRight: '8px' }}></i>
+                <i className="fas fa-envelope" style={{ marginRight: '8px' }}></i>
                 <span>AdoptMessages</span>
               </a>
             </li>

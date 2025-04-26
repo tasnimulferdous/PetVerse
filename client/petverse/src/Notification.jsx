@@ -81,14 +81,8 @@ function Notification() {
                         </li>
                         <li>
                             <a href="/adopt-message">
-                                <i className="fas fa-comments"></i>
+                                <i className="fas fa-envelope"></i>
                                 <span>AdoptMessages</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/notifications">
-                                <i className="fas fa-bell"></i>
-                                <span>Notifications</span>
                             </a>
                         </li>
                         <li>
