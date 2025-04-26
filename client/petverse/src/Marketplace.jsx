@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
+import axios from 'axios';
+import BuyRequestForm from './components/BuyRequestForm';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +15,8 @@ const Marketplace = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOption, setSortOption] = useState('');
+  const [showBuyForm, setShowBuyForm] = useState(false);
+  const [buyProduct, setBuyProduct] = useState(null);
   const navigate = useNavigate();
 
   // Fetch products
@@ -100,8 +104,17 @@ const Marketplace = () => {
     }
   };
 
-  // Add to wishlist
-  const addToWishlist = async (productId) => {
+  const handleBuyClick = (product) => {
+    setBuyProduct(product);
+    setShowBuyForm(true);
+  };
+
+  const handleBuyFormClose = () => {
+    setShowBuyForm(false);
+    setBuyProduct(null);
+  };
+
+  const handleBuyFormSubmit = async (formData) => {
     try {
       const user = JSON.parse(localStorage.getItem('loggedInUser'));
       if (!user) {
@@ -109,26 +122,38 @@ const Marketplace = () => {
         return;
       }
 
-      const response = await fetch(getApiUrl('api/marketplace/wishlist'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user._id || user.id}`,
+      const orderData = {
+        userId: user._id || user.id,
+        orderItems: [
+          {
+            name: buyProduct.name,
+            qty: 1,
+            image: buyProduct.image,
+            price: buyProduct.price,
+            product: buyProduct._id,
+          },
+        ],
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country,
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          productId,
-        }),
-      });
+        paymentMethod: 'Direct',
+        taxPrice: 0,
+        shippingPrice: 0,
+        totalPrice: buyProduct.price,
+        isPaid: false,
+        isDelivered: false,
+      };
 
-      if (!response.ok) {
-        throw new Error('Failed to add to wishlist');
-      }
-
-      alert('Product added to wishlist!');
+      await axios.post(getApiUrl('api/marketplace/orders'), orderData, { withCredentials: true });
+      alert('Buy request submitted successfully');
+      setShowBuyForm(false);
+      setBuyProduct(null);
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add to wishlist. Please try again.');
+      console.error('Error submitting buy request:', error);
+      alert('Failed to submit buy request');
     }
   };
 
@@ -141,8 +166,6 @@ const Marketplace = () => {
       filteredProducts.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       filteredProducts.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'rating') {
-      filteredProducts.sort((a, b) => b.rating - a.rating);
     } else if (sortOption === 'newest') {
       filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
@@ -166,12 +189,6 @@ const Marketplace = () => {
           >
             <i className="fas fa-plus"></i> Submit Product
           </button>
-          <div className="marketplace-cart-icon">
-            <a href="/marketplace/cart">
-              <i className="fas fa-shopping-cart"></i>
-              {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
-            </a>
-          </div>
         </div>
       </header>
       
@@ -260,7 +277,6 @@ const Marketplace = () => {
                 <option value="">Default</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
                 <option value="newest">Newest Arrivals</option>
               </select>
             </div>
@@ -272,53 +288,39 @@ const Marketplace = () => {
             <div className="error-message">{error}</div>
           ) : (
             <div className="products-grid">
-              {getFilteredAndSortedProducts().length === 0 ? (
-                <div className="no-products">No products found.</div>
-              ) : (
-                getFilteredAndSortedProducts().map((product) => (
-                  <div key={product._id} className="product-card">
-                    <div className="product-image">
-                      <img src={product.image} alt={product.name} />
-                    </div>
-                    <div className="product-info">
-                      <h3>{product.name}</h3>
-                      <div className="product-rating">
-                        {[...Array(5)].map((_, index) => (
-                          <i
-                            key={index}
-                            className={`fas fa-star ${index < Math.round(product.rating) ? 'filled' : ''}`}
-                          />
-                        ))}
-                        <span>({product.numReviews} reviews)</span>
-                      </div>
-                      <p className="product-price">${product.price.toFixed(2)}</p>
-                      <p className="product-brand">{product.brand}</p>
-                      <div className="product-actions">
-                        <button
-                          onClick={() => addToCart(product)}
-                          className={`cart-button ${isInCart(product._id) ? 'in-cart' : ''}`}
-                          disabled={product.countInStock === 0}
-                        >
-                          {product.countInStock === 0 ? 'Out of Stock' : 
-                           isInCart(product._id) ? 'In Cart' : 'Add to Cart'}
-                        </button>
-                        <button 
-                          onClick={() => addToWishlist(product._id)}
-                          className="wishlist-button"
-                        >
-                          <i className="far fa-heart"></i>
-                        </button>
-                      </div>
+              {getFilteredAndSortedProducts().map((product) => (
+                <div key={product._id} className="product-card">
+                  <div className="product-image">
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                  <div className="product-info">
+                    <h3>{product.name}</h3>
+                    <p className="product-price">TK {product.price.toFixed(2)}</p>
+                    <p className="product-brand">{product.brand}</p>
+                    <div className="product-actions">
+                      <button
+                        onClick={() => handleBuyClick(product)}
+                        className="buy-button"
+                      >
+                        Buy
+                      </button>
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           )}
         </main>
       </div>
+      {showBuyForm && buyProduct && (
+        <BuyRequestForm
+          product={buyProduct}
+          onClose={handleBuyFormClose}
+          onSubmit={handleBuyFormSubmit}
+        />
+      )}
     </div>
   );
 };
 
-export default Marketplace; 
+export default Marketplace;

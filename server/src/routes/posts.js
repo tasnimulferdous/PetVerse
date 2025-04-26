@@ -165,4 +165,33 @@ router.put('/posts/:postId/comment/:commentId', async (req, res) => {
 
 
 
+// Delete a comment
+router.delete('/posts/:postId/comment/:commentId', async (req, res) => {
+  const { postId, commentId } = req.params;
+  const user = req.query.user;
+  if (!user) {
+    return res.status(400).json({ message: 'User is required' });
+  }
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    if (comment.user !== user) {
+      return res.status(403).json({ message: 'Unauthorized to delete this comment' });
+    }
+    // Remove comment manually from comments array
+    post.comments = post.comments.filter(c => c._id.toString() !== commentId);
+    await post.save();
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ message: 'Failed to delete comment' });
+  }
+});
+
 module.exports = router;

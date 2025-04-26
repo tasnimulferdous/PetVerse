@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PET_SELL_POSTS_URL, PET_SELL_POST_DETAIL_URL, getImageUrl } from './apiConfig';
 import { toast } from 'react-toastify';
+import BuyRequestForm from './components/BuyRequestForm';
 import './App.css';
 
 function PetMarketplace() {
@@ -17,6 +18,8 @@ function PetMarketplace() {
     gender: '',
     sortOption: ''
   });
+  const [showBuyForm, setShowBuyForm] = useState(false);
+  const [buyPet, setBuyPet] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,8 +94,18 @@ function PetMarketplace() {
   const closePetDetails = () => {
     setSelectedPet(null);
   };
-  
-  const addToWishlist = async (petId) => {
+
+  const handleBuyClick = (pet) => {
+    setBuyPet(pet);
+    setShowBuyForm(true);
+  };
+
+  const handleBuyFormClose = () => {
+    setShowBuyForm(false);
+    setBuyPet(null);
+  };
+
+  const handleBuyFormSubmit = async (formData) => {
     try {
       const user = JSON.parse(localStorage.getItem('loggedInUser'));
       if (!user) {
@@ -100,12 +113,38 @@ function PetMarketplace() {
         return;
       }
 
-      // Assuming there's an API endpoint for adding pets to wishlist
-      // You would need to implement this endpoint on the server
-      toast.success('Pet added to wishlist!');
+      const orderData = {
+        user: user._id || user.id,
+        orderItems: [
+          {
+            name: buyPet.name,
+            qty: 1,
+            image: buyPet.images[0],
+            price: buyPet.price,
+            product: buyPet._id,
+          },
+        ],
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country,
+        },
+        paymentMethod: 'Direct',
+        taxPrice: 0,
+        shippingPrice: 0,
+        totalPrice: buyPet.price,
+        isPaid: false,
+        isDelivered: false,
+      };
+
+      await axios.post('/api/marketplace/orders', orderData, { withCredentials: true });
+      toast.success('Buy request submitted successfully');
+      setShowBuyForm(false);
+      setBuyPet(null);
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist');
+      console.error('Error submitting buy request:', error);
+      toast.error('Failed to submit buy request');
     }
   };
 
@@ -276,20 +315,14 @@ function PetMarketplace() {
                       {pet.species && <span className="badge bg-info me-2">{pet.species}</span>}
                       {pet.breed} • {pet.age} {pet.ageUnit} • {pet.gender.charAt(0).toUpperCase() + pet.gender.slice(1)}
                     </p>
-                    <p className="product-price">${pet.price.toFixed(2)}</p>
+                    <p className="product-price">TK {pet.price.toFixed(2)}</p>
                     <p className="product-brand"><i className="fas fa-map-marker-alt"></i> {pet.location}</p>
                     <div className="product-actions">
                       <button
-                        onClick={() => openPetDetails(pet._id)}
-                        className="view-details-button"
+                        onClick={() => handleBuyClick(pet)}
+                        className="buy-button"
                       >
-                        View Details
-                      </button>
-                      <button 
-                        onClick={() => addToWishlist(pet._id)}
-                        className="wishlist-button"
-                      >
-                        <i className="far fa-heart"></i>
+                        Buy
                       </button>
                     </div>
                   </div>
@@ -299,96 +332,15 @@ function PetMarketplace() {
           )}
         </main>
       </div>
-
-      {/* Pet Details Modal */}
-      {selectedPet && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-header">
-              <h3>{selectedPet.name}</h3>
-              <button className="close-modal-button" onClick={closePetDetails}>
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-md-6">
-                  <div id="petDetailsCarousel" className="carousel slide">
-                    <div className="carousel-inner">
-                      {selectedPet.images.map((image, index) => (
-                        <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                          <img 
-                            src={getImageUrl(image)} 
-                            className="d-block w-100" 
-                            alt={`${selectedPet.name} ${index + 1}`}
-                            style={{ height: '300px', objectFit: 'cover' }} 
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    {selectedPet.images.length > 1 && (
-                      <>
-                        <button className="carousel-control-prev" type="button" data-bs-target="#petDetailsCarousel" data-bs-slide="prev">
-                          <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                          <span className="visually-hidden">Previous</span>
-                        </button>
-                        <button className="carousel-control-next" type="button" data-bs-target="#petDetailsCarousel" data-bs-slide="next">
-                          <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                          <span className="visually-hidden">Next</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="col-md-6">
-                  <h3>{selectedPet.name}</h3>
-                  <div className="mb-3">
-                    {selectedPet.species && <span className="badge bg-info me-2">{selectedPet.species}</span>}
-                    <span className="badge bg-primary me-2">{selectedPet.breed}</span>
-                    <span className="badge bg-secondary me-2">
-                      {selectedPet.age} {selectedPet.ageUnit}
-                    </span>
-                    <span className="badge bg-dark">
-                      {selectedPet.gender.charAt(0).toUpperCase() + selectedPet.gender.slice(1)}
-                    </span>
-                  </div>
-                  <h4 className="text-primary mb-3">${selectedPet.price.toFixed(2)}</h4>
-                  <p><strong>Location:</strong> {selectedPet.location}</p>
-                  <p><strong>Health Status:</strong> {selectedPet.healthStatus}</p>
-                  <p><strong>Vaccination:</strong> {selectedPet.vaccination || 'Not specified'}</p>
-
-                  <div className="action-buttons">
-                    <button className="btn btn-success">
-                      <i className="fas fa-phone"></i> Contact Seller
-                    </button>
-                    <button className="btn btn-outline-primary" onClick={() => addToWishlist(selectedPet._id)}>
-                      <i className="far fa-heart"></i> Add to Wishlist
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4">
-                <h5>Description</h5>
-                <p>{selectedPet.description}</p>
-              </div>
-              
-              <div className="mt-3">
-                <h5>Seller Information</h5>
-                <p><strong>Name:</strong> {selectedPet.user?.name || 'Anonymous'}</p>
-                <p><strong>Listed on:</strong> {new Date(selectedPet.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="cancel-button" onClick={closePetDetails}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {showBuyForm && buyPet && (
+        <BuyRequestForm
+          product={buyPet}
+          onClose={handleBuyFormClose}
+          onSubmit={handleBuyFormSubmit}
+        />
       )}
     </div>
   );
 }
 
-export default PetMarketplace; 
+export default PetMarketplace;

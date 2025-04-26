@@ -148,63 +148,65 @@ function AdminDashboard() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Admin Dashboard</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <button onClick={handleLogout}>Logout</button>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            onClick={navigateToProductReview} 
-            style={{ 
-              backgroundColor: pendingSubmissions > 0 ? '#ff6b6b' : '#4caf50',
-              color: 'white',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Review Product Submissions {pendingSubmissions > 0 && `(${pendingSubmissions})`}
-          </button>
-          <button 
-            onClick={navigateToPetSellReview} 
-            style={{ 
-              backgroundColor: pendingPetPosts > 0 ? '#ff6b6b' : '#4caf50',
-              color: 'white',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Review Pet Posts {pendingPetPosts > 0 && `(${pendingPetPosts})`}
-          </button>
+    <>
+      <div style={{ padding: '20px' }}>
+        <h1>Admin Dashboard</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <button onClick={handleLogout}>Logout</button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={navigateToProductReview} 
+              style={{ 
+                backgroundColor: pendingSubmissions > 0 ? '#ff6b6b' : '#4caf50',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Review Product Submissions {pendingSubmissions > 0 && `(${pendingSubmissions})`}
+            </button>
+            <button 
+              onClick={navigateToPetSellReview} 
+              style={{ 
+                backgroundColor: pendingPetPosts > 0 ? '#ff6b6b' : '#4caf50',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Review Pet Posts {pendingPetPosts > 0 && `(${pendingPetPosts})`}
+            </button>
+          </div>
+        </div>
+        <SearchBar onSearch={handleSearch} />
+        <h2>Registered Users</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {filteredUsers.map(user => (
+            <UserCard key={user._id} user={user} onDelete={handleDeleteUser} />
+          ))}
+        </div>
+        <h2>User Posts</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {Object.keys(filteredPostsByUser).map(userId => (
+            <div key={userId} style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
+  {(() => {
+    const user = users.find(u => u._id.toString() === userId);
+    return <h3>Posts by {user ? user.name : userId}</h3>;
+  })()}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {filteredPostsByUser[userId].map(post => (
+                  <PostCard key={post._id} post={post} onDelete={handleDeletePost} />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      <SearchBar onSearch={handleSearch} />
-      <h2>Registered Users</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-        {filteredUsers.map(user => (
-          <UserCard key={user._id} user={user} onDelete={handleDeleteUser} />
-        ))}
-      </div>
-      <h2>User Posts</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {Object.keys(filteredPostsByUser).map(userId => (
-          <div key={userId} style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px' }}>
-{(() => {
-  const user = users.find(u => u._id.toString() === userId);
-  return <h3>Posts by {user ? user.name : userId}</h3>;
-})()}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {filteredPostsByUser[userId].map(post => (
-                <PostCard key={post._id} post={post} onDelete={handleDeletePost} />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
 
