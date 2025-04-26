@@ -285,13 +285,19 @@ const handleDeleteComment = async (postId, commentId) => {
             <li>
               <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
-                <span>Product Marketplace</span>
+                <span>Marketplace</span>
               </a>
             </li>
             <li>
               <a href="/pet-marketplace">
                 <i className="fas fa-dog" style={{ marginRight: '8px' }}></i>
                 <span>Pet Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications">
+                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
+                <span>Notification</span>
               </a>
             </li>
             <li>
@@ -310,12 +316,6 @@ const handleDeleteComment = async (postId, commentId) => {
               <a href="/my-submissions">
                 <i className="fas fa-box" style={{ marginRight: '8px' }}></i>
                 <span>My Product Submissions</span>
-              </a>
-            </li>
-            <li>
-              <a href="/notifications">
-                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
-                <span>Notification</span>
               </a>
             </li>
             <li>

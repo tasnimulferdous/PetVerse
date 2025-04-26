@@ -104,15 +104,27 @@ function Profile() {
               </a>
             </li>
             <li>
+              <a href="/adopt-message">
+                <i className="fas fa-envelope" style={{ marginRight: '8px' }}></i>
+                <span>AdoptMessages</span>
+              </a>
+            </li>
+            <li>
               <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
               </a>
             </li>
             <li>
-              <a href="/adopt-message">
+              <a href="/pet-marketplace">
+                <i className="fas fa-paw"></i>
+                <span>Pet Marketplace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/notifications">
                 <i className="fas fa-bell"></i>
-                <span>Adoption Messages</span>
+                <span>Notification</span>
               </a>
             </li>
             <li>

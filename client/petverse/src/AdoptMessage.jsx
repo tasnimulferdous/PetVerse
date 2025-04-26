@@ -273,7 +273,7 @@ function AdoptMessage() {
                         </li>
                         <li>
                             <a href="/notifications">
-                                <i className="fas fa-envelope" style={{ marginRight: '8px' }}></i>
+                                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                                 <span>Notification</span>
                             </a>
                         </li>

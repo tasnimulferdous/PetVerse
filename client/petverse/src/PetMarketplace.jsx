@@ -201,6 +201,12 @@ function PetMarketplace() {
               </a>
             </li>
             <li>
+              <a href="/adopt-message">
+                <i className="fas fa-envelope"></i>
+                <span>AdoptMessages</span>
+              </a>
+            </li>
+            <li>
               <a href="/marketplace">
                 <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
                 <span>Marketplace</span>
@@ -216,12 +222,6 @@ function PetMarketplace() {
               <a href="/profile">
                 <i className="fas fa-user" style={{ marginRight: '8px' }}></i>
                 <span>Profile</span>
-              </a>
-            </li>
-            <li>
-              <a href="/adopt-message">
-                <i className="fas fa-bell"></i>
-                <span>Adoption Messages</span>
               </a>
             </li>
             <li>

@@ -299,7 +299,7 @@ function Adoption() {
             <li>
               <a href="/notifications">
                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
-                <span>Notifications</span>
+                <span>Notification</span>
               </a>
             </li>
             <li>

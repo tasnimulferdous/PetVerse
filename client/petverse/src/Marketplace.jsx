@@ -208,6 +208,12 @@ const Marketplace = () => {
               </a>
             </li>
             <li>
+              <a href="/adopt-message">
+                <i className="fas fa-envelope" style={{ marginRight: '8px' }}></i>
+                <span>AdoptMessages</span>
+              </a>
+            </li>
+            <li>
               <a href="/notifications">
                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                 <span>Notification</span>
