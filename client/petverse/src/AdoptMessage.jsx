@@ -155,6 +155,17 @@ function AdoptMessage() {
                     top: 10,
                     bottom: 20
                 }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
             }
         },
         maintainAspectRatio: false,
