@@ -178,8 +178,9 @@
 
 .message-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid #e1e8ed;
 }
@@ -434,4 +435,37 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: #1da1f2;
+}
+
+.status-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+.status-approved {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.status-denied {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.status-pending {
+    background-color: #f1c40f;
+    color: white;
 }

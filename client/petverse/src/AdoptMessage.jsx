@@ -40,7 +40,7 @@ function AdoptMessage() {
     const fetchMessages = async (userId) => {
         try {
             const response = await axios.get(
-                getApiUrl(`api/users/${userId}/notifications`)
+                getApiUrl(`api/users/${userId}/messages`)
             );
             setMessages(response.data);
         } catch (error) {
@@ -50,13 +50,19 @@ function AdoptMessage() {
 
     const updateRequestStatus = async (messageId, status) => {
         try {
-            await axios.patch(
-                getApiUrl(`api/users/notifications/${messageId}/status`),
+            const response = await axios.patch(
+                getApiUrl(`api/users/messages/${messageId}/status`),
                 { status }
             );
-            setMessages(
-                messages.map((m) => (m._id === messageId ? { ...m, status } : m))
-            );
+            
+            if (response.data.message) {
+                // Update the local state to reflect the new status
+                setMessages(prevMessages => 
+                    prevMessages.map((m) => 
+                        m._id === messageId ? { ...m, status } : m
+                    )
+                );
+            }
         } catch (error) {
             console.error(`Failed to update message status to ${status}`, error);
         }
@@ -70,29 +76,86 @@ function AdoptMessage() {
                 return;
             }
             const userObj = JSON.parse(loggedInUser);
-
-            // First update the message status
-            await updateRequestStatus(messageId, "approved");
-
-            // Then delete the adoption post
             const message = messages.find((m) => m._id === messageId);
-            if (message && message.postId) {
-                await axios.delete(getApiUrl(`api/adoption/${message.postId}`), {
-                    data: { user: userObj.name },
-                });
+
+            if (message) {
+                try {
+                    // Create notification for the requester
+                    await axios.post(getApiUrl('api/users/notifications'), {
+                        userId: message.requesterId,
+                        requesterId: userObj._id,
+                        requesterName: userObj.name,
+                        postId: message.postId,
+                        petType: message.petType,
+                        description: "Your adoption request has been approved!",
+                        location: message.location,
+                        imageUrl: message.imageUrl,
+                        status: "approved"
+                    });
+
+                    // Update the message status to approved
+                    await updateRequestStatus(messageId, "approved");
+
+                    // Delete the adoption post
+                    if (message.postId) {
+                        await axios.delete(getApiUrl(`api/adoption/${message.postId}`), {
+                            data: { user: userObj.name },
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to process approval", error);
+                }
             }
         } catch (error) {
             console.error("Failed to approve request and delete post", error);
         }
     };
 
-    const denyRequest = (messageId) => {
-        updateRequestStatus(messageId, "denied");
+    const denyRequest = async (messageId) => {
+        try {
+            const loggedInUser = localStorage.getItem("loggedInUser");
+            if (!loggedInUser) {
+                console.error("No logged in user found");
+                return;
+            }
+            const userObj = JSON.parse(loggedInUser);
+            const message = messages.find((m) => m._id === messageId);
+
+            if (message) {
+                try {
+                    // Create notification for the requester
+                    await axios.post(getApiUrl('api/users/notifications'), {
+                        userId: message.requesterId,
+                        requesterId: userObj._id,
+                        requesterName: userObj.name,
+                        postId: message.postId,
+                        petType: message.petType,
+                        description: "Your adoption request has been denied.",
+                        location: message.location,
+                        imageUrl: message.imageUrl,
+                        status: "denied"
+                    });
+
+                    // Update the message status to denied
+                    await updateRequestStatus(messageId, "denied");
+                } catch (error) {
+                    console.error("Failed to process denial", error);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to deny request", error);
+        }
     };
 
     const deleteMessage = async (messageId) => {
         try {
-            await axios.delete(getApiUrl(`api/users/notifications/${messageId}`));
+            const loggedInUser = localStorage.getItem("loggedInUser");
+            if (!loggedInUser) {
+                console.error("No logged in user found");
+                return;
+            }
+            const userObj = JSON.parse(loggedInUser);
+            await axios.delete(getApiUrl(`api/users/${userObj._id}/messages/${messageId}`));
             setMessages(messages.filter((m) => m._id !== messageId));
         } catch (error) {
             console.error("Failed to delete message", error);
@@ -215,7 +278,7 @@ function AdoptMessage() {
                             </a>
                         </li>
                         <li>
-                            <a href="/adopt-message">
+                            <a href="/notifications">
                                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                                 <span>Notifications</span>
                             </a>
@@ -289,7 +352,7 @@ function AdoptMessage() {
                                             <strong>Status:</strong> {message.status}
                                         </p>
                                         <div className="message-actions">
-                                            {message.status === "pending" && (
+                                            {message.status === "pending" ? (
                                                 <>
                                                     <button
                                                         onClick={() => approveRequest(message._id)}
@@ -304,6 +367,12 @@ function AdoptMessage() {
                                                         Deny
                                                     </button>
                                                 </>
+                                            ) : (
+                                                <div className="status-display">
+                                                    <span className={`status-badge status-${message.status}`}>
+                                                        {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
+                                                    </span>
+                                                </div>
                                             )}
                                             <button
                                                 onClick={() => deleteMessage(message._id)}

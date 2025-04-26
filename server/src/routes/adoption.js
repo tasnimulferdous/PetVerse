@@ -5,6 +5,7 @@ const path = require('path');
 const AdoptionPost = require('../models/AdoptionPost');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.post('/adoption', upload.single('image'), async (req, res) => {
   }
 });
 
-// Request adoption for a post and create notification
+// Request adoption for a post and create message
 router.post('/adoption/:postId/request', async (req, res) => {
   try {
     const { postId } = req.params;
@@ -79,8 +80,7 @@ router.post('/adoption/:postId/request', async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Create notification for post owner
-    // Ensure userId is an ObjectId, not a username string
+    // Find the post owner's user ID
     let userObjectId = null;
     if (post.userId) {
       userObjectId = post.userId;
@@ -100,7 +100,8 @@ router.post('/adoption/:postId/request', async (req, res) => {
       return res.status(400).json({ message: 'RequesterId is required' });
     }
 
-    const notification = new Notification({
+    // Create message for the post owner
+    const message = new Message({
       userId: userObjectId,
       requesterId,
       requesterName,
@@ -113,9 +114,9 @@ router.post('/adoption/:postId/request', async (req, res) => {
       timestamp: new Date(),
     });
 
-    await notification.save();
+    await message.save();
 
-    res.status(201).json({ message: 'Adoption request sent and notification created' });
+    res.status(201).json({ message: 'Adoption request sent successfully' });
   } catch (error) {
     console.error('Failed to send adoption request', error);
     res.status(500).json({ message: 'Failed to send adoption request' });

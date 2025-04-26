@@ -165,65 +165,64 @@ function Adoption() {
     if (loadingRequests[postId] || hasRequested(postId)) return;
     
     setLoadingRequests(prev => ({
-      ...prev,
-      [postId]: true
+        ...prev,
+        [postId]: true
     }));
 
     const loggedInUser = localStorage.getItem('loggedInUser');
     if (!loggedInUser) {
-      setLoadingRequests(prev => ({
-        ...prev,
-        [postId]: false
-      }));
-      navigate('/login');
-      return;
+        setLoadingRequests(prev => ({
+            ...prev,
+            [postId]: false
+        }));
+        navigate('/login');
+        return;
     }
 
     const userObj = JSON.parse(loggedInUser);
     try {
-      await axios.post(`http://localhost:3000/api/adoption/${postId}/request`, {
-        requesterId: userObj._id,
-        requesterName: userObj.name,
-        petType: post.petType,
-        description: requestDescriptions[postId] || '',
-        location: post.location,
-        imageUrl: post.imageUrl,
-        requestDescription: requestDescriptions[postId] || '',
-      });
-      
-      // Add to requested posts and update localStorage
-      setRequestedPosts(prev => {
-        const updated = [...prev, postId];
-        localStorage.setItem('requestedAdoptionPosts', JSON.stringify(updated));
-        return updated;
-      });
-      
-      // Clear the description for this post
-      setRequestDescriptions(prev => {
-        const newState = { ...prev };
-        delete newState[postId];
-        return newState;
-      });
+        await axios.post(getApiUrl(`api/adoption/${postId}/request`), {
+            requesterId: userObj._id,
+            requesterName: userObj.name,
+            petType: post.petType,
+            description: requestDescriptions[postId] || '',
+            location: post.location,
+            imageUrl: post.imageUrl
+        });
+        
+        // Add to requested posts and update localStorage
+        setRequestedPosts(prev => {
+            const updated = [...prev, postId];
+            localStorage.setItem('requestedAdoptionPosts', JSON.stringify(updated));
+            return updated;
+        });
+        
+        // Clear the description for this post
+        setRequestDescriptions(prev => {
+            const newState = { ...prev };
+            delete newState[postId];
+            return newState;
+        });
 
-      setSuccessMessage('Adoption request sent successfully!');
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        setSuccessMessage('');
-      }, 3000);
+        setSuccessMessage('Adoption request sent successfully!');
+        setShowSuccess(true);
+        setTimeout(() => {
+            setShowSuccess(false);
+            setSuccessMessage('');
+        }, 3000);
     } catch (error) {
-      console.error('Failed to send adoption request', error);
-      setSuccessMessage('Failed to send adoption request. Please try again.');
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        setSuccessMessage('');
-      }, 3000);
+        console.error('Failed to send adoption request', error);
+        setSuccessMessage('Failed to send adoption request. Please try again.');
+        setShowSuccess(true);
+        setTimeout(() => {
+            setShowSuccess(false);
+            setSuccessMessage('');
+        }, 3000);
     } finally {
-      setLoadingRequests(prev => ({
-        ...prev,
-        [postId]: false
-      }));
+        setLoadingRequests(prev => ({
+            ...prev,
+            [postId]: false
+        }));
     }
   };
 
@@ -298,7 +297,7 @@ function Adoption() {
               </a>
             </li>
             <li>
-              <a href="/adopt-message">
+              <a href="/notifications">
                 <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
                 <span>Notifications</span>
               </a>

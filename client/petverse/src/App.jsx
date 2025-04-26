@@ -6,7 +6,7 @@ import Dashboard from './Dashboard';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import Profile from './Profile';
 import Adoption from './Adoption';
-// import Notification from './Notification';
+import Notification from './Notification';
 import Search from './Search';
 import Marketplace from './Marketplace';
 import MarketplaceCart from './MarketplaceCart';
@@ -29,7 +29,9 @@ function Navigation() {
     const location = useLocation();
 
     // Don't render navigation on specific pages
-    if (location.pathname === '/adoption' || location.pathname === '/adopt-message') {
+    if (location.pathname === '/adoption' || 
+        location.pathname === '/adopt-message' || 
+        location.pathname === '/notifications') {
         return null;
     }
 
@@ -50,7 +52,7 @@ function Navigation() {
                 <Link to="/marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Marketplace</Link>
                 <Link to="/pet-marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Pet Marketplace</Link>
                 <Link to="/adopt-message" className="nav-link" onClick={() => setMenuOpen(false)}>AdoptMessages</Link>
-                {/* <Link to="/notifications" className="nav-link" onClick={() => setMenuOpen(false)}>Notification</Link> */}
+                <Link to="/notifications" className="nav-link" onClick={() => setMenuOpen(false)}>Notification</Link>
                 <Link to="/profile" className="nav-link" onClick={() => setMenuOpen(false)}>Profile</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMenuOpen(false)}>Search</Link>
                 <Link to="/submit-product" className="nav-link" onClick={() => setMenuOpen(false)}>Submit Product</Link>
@@ -75,7 +77,7 @@ function App() {
                 <Route path="/marketplace/order/:id" element={<MarketplaceOrder />} />
                 <Route path="/submit-product" element={<SubmitProduct />} />
                 <Route path="/my-submissions" element={<MySubmissions />} />
-                {/* <Route path="/notifications" element={<Notification />} /> */}
+                <Route path="/notifications" element={<Notification />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/pet-marketplace" element={<PetMarketplace />} />
