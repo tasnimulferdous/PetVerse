@@ -67,9 +67,9 @@ function Search() {
               </a>
             </li>
             <li>
-              <a href="/notifications">
-                <i className="fas fa-bell" style={{ marginRight: '8px' }}></i>
-                <span>Notification</span>
+              <a href="/adopt-message">
+                <i className="fas fa-bell"></i>
+                <span>Adoption Messages</span>
               </a>
             </li>
             <li>

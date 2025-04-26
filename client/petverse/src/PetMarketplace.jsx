@@ -180,6 +180,12 @@ function PetMarketplace() {
               </a>
             </li>
             <li>
+              <a href="/adopt-message">
+                <i className="fas fa-bell"></i>
+                <span>Adoption Messages</span>
+              </a>
+            </li>
+            <li>
               <button onClick={handleLogout} className="logout-button">
                 <i className="fas fa-sign-out-alt" style={{ marginRight: '8px' }}></i>
                 <span>Logout</span>
