@@ -79,13 +79,13 @@ router.post('/adoption/:postId/request', async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Create notification for post owner
-    // Ensure userId is an ObjectId, not a username string
+    //notification for post owner
+
     let userObjectId = null;
     if (post.userId) {
       userObjectId = post.userId;
     } else if (post.user) {
-      // post.user is username, find user by name to get ObjectId
+ 
       const user = await User.findOne({ name: post.user });
       if (user) {
         userObjectId = user._id;

@@ -43,8 +43,8 @@ function Navigation() {
                 <i className={`fas ${menuOpen ? 'fa-times' : 'fa-bars'}`}></i>
             </button>
             <nav className={`nav-bar ${menuOpen ? 'nav-open' : ''}`}>
-                <Link to="/signup" className="nav-link" onClick={() => setMenuOpen(false)}>Signup</Link>
-                <Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link>
+                {/* <Link to="/signup" className="nav-link" onClick={() => setMenuOpen(false)}>Signup</Link> */}
+                {/* <Link to="/login" className="nav-link" onClick={() => setMenuOpen(false)}>Login</Link> */}
                 <Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>Dashboard</Link>
                 <Link to="/adoption" className="nav-link" onClick={() => setMenuOpen(false)}>Adoption</Link>
                 <Link to="/marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Marketplace</Link>

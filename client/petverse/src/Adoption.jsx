@@ -382,6 +382,18 @@ function Adoption() {
         <div className="adoption-posts-container">
           <h2>Available Pets for Adoption</h2>
           <div className="filter-container">
+            <select
+              value={filterPetType}
+              onChange={(e) => setFilterPetType(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Pet Types</option>
+              <option value="cat">Cat</option>
+              <option value="dog">Dog</option>
+              <option value="bird">Bird</option>
+              <option value="fish">Fish</option>
+              <option value="others">Others</option>
+            </select>
             <input
               type="text"
               placeholder="Filter by Location"
