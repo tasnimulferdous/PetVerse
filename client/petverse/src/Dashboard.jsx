@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
 import { handleLogout } from './utils/auth';
+import TrendingTopics from './components/TrendingTopics';
 
 function Dashboard() {
   const [posts, setPosts] = useState([]);
@@ -11,7 +12,10 @@ function Dashboard() {
   const [newImage, setNewImage] = useState(null);
   const [commentInputs, setCommentInputs] = useState({}); // to hold comment input per post
   const [currentUser, setCurrentUser] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialSearchTerm = queryParams.get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [editingPostId, setEditingPostId] = useState(null);
   const [editContent, setEditContent] = useState('');
@@ -43,6 +47,7 @@ function Dashboard() {
       );
     }
   }, [searchTerm, posts]);
+
 
   const fetchPosts = async () => {
     try {
@@ -257,6 +262,9 @@ const handleDeleteComment = async (postId, commentId) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <TrendingTopics />
         </div>
       </header>
       <div className="dashboard-body">

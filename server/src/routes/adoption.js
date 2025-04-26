@@ -85,7 +85,7 @@ router.post('/adoption/:postId/request', async (req, res) => {
     if (post.userId) {
       userObjectId = post.userId;
     } else if (post.user) {
-      // post.user is username, find user by name to get ObjectId
+ 
       const user = await User.findOne({ name: post.user });
       if (user) {
         userObjectId = user._id;
