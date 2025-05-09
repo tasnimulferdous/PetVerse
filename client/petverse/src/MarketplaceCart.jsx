@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
+import PaymentAnimation from './components/PaymentAnimation';
 
 const MarketplaceCart = () => {
   const [cart, setCart] = useState({ cartItems: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const navigate = useNavigate();
 
   // Calculate cart totals
@@ -143,13 +145,47 @@ const MarketplaceCart = () => {
     }
   };
 
-  // Checkout handler
-  const checkoutHandler = () => {
-    navigate('/marketplace/checkout');
+  // Process payment
+  const processPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Clear the cart after successful payment
+      const user = JSON.parse(localStorage.getItem('loggedInUser'));
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(getApiUrl('api/marketplace/cart/clear'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user._id}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear cart');
+      }
+
+      // Show success message and redirect
+      alert('Payment successful! Thank you for your purchase.');
+      navigate('/marketplace');
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      alert('Payment failed. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   return (
     <div className="dashboard-container">
+      <PaymentAnimation isProcessing={isProcessingPayment} />
+      
       <header className="dashboard-header">
         <h1>Your Cart</h1>
       </header>
@@ -251,7 +287,7 @@ const MarketplaceCart = () => {
                               onClick={() => removeFromCart(item.product)}
                               className="remove-button"
                             >
-                              <i className="fas fa-trash-alt"></i>
+                              <i className="fas fa-trash"></i>
                             </button>
                           </div>
                         </div>
@@ -262,11 +298,11 @@ const MarketplaceCart = () => {
                   <div className="cart-summary">
                     <h3>Order Summary</h3>
                     <div className="summary-item">
-                      <span>Items:</span>
+                      <span>Items Price:</span>
                       <span>${itemsPrice.toFixed(2)}</span>
                     </div>
                     <div className="summary-item">
-                      <span>Tax:</span>
+                      <span>Tax (15%):</span>
                       <span>${taxPrice.toFixed(2)}</span>
                     </div>
                     <div className="summary-item">
@@ -278,17 +314,11 @@ const MarketplaceCart = () => {
                       <span>${totalPrice.toFixed(2)}</span>
                     </div>
                     <button 
-                      onClick={checkoutHandler}
+                      onClick={processPayment}
                       className="checkout-button"
-                      disabled={cart.cartItems.length === 0}
+                      disabled={isProcessingPayment}
                     >
-                      Proceed to Checkout
-                    </button>
-                    <button 
-                      onClick={() => navigate('/marketplace')}
-                      className="continue-shopping"
-                    >
-                      Continue Shopping
+                      {isProcessingPayment ? 'Processing...' : 'Pay Now'}
                     </button>
                   </div>
                 </div>
