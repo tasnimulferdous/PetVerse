@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { PET_SELL_POSTS_URL, PET_SELL_POST_DETAIL_URL, getImageUrl } from './apiConfig';
 import { toast } from 'react-toastify';
-import BuyRequestForm from './components/BuyRequestForm';
 import './App.css';
 
 function PetMarketplace() {
@@ -18,8 +17,6 @@ function PetMarketplace() {
     gender: '',
     sortOption: ''
   });
-  const [showBuyForm, setShowBuyForm] = useState(false);
-  const [buyPet, setBuyPet] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -95,17 +92,7 @@ function PetMarketplace() {
     setSelectedPet(null);
   };
 
-  const handleBuyClick = (pet) => {
-    setBuyPet(pet);
-    setShowBuyForm(true);
-  };
-
-  const handleBuyFormClose = () => {
-    setShowBuyForm(false);
-    setBuyPet(null);
-  };
-
-  const handleBuyFormSubmit = async (formData) => {
+  const handleBuyClick = async (pet) => {
     try {
       const user = JSON.parse(localStorage.getItem('loggedInUser'));
       if (!user) {
@@ -113,38 +100,29 @@ function PetMarketplace() {
         return;
       }
 
-      const orderData = {
-        user: user._id || user.id,
-        orderItems: [
-          {
-            name: buyPet.name,
-            qty: 1,
-            image: buyPet.images[0],
-            price: buyPet.price,
-            product: buyPet._id,
-          },
-        ],
-        shippingAddress: {
-          address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          country: formData.country,
+      const response = await fetch(getApiUrl('api/marketplace/cart'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user._id || user.id}`,
         },
-        paymentMethod: 'Direct',
-        taxPrice: 0,
-        shippingPrice: 0,
-        totalPrice: buyPet.price,
-        isPaid: false,
-        isDelivered: false,
-      };
+        credentials: 'include',
+        body: JSON.stringify({
+          productId: pet._id,
+          qty: 1,
+          userId: user._id || user.id
+        }),
+      });
 
-      await axios.post('/api/marketplace/orders', orderData, { withCredentials: true });
-      toast.success('Buy request submitted successfully');
-      setShowBuyForm(false);
-      setBuyPet(null);
+      if (!response.ok) {
+        throw new Error('Failed to add to cart');
+      }
+
+      const data = await response.json();
+      toast.success('Added to cart!');
     } catch (error) {
-      console.error('Error submitting buy request:', error);
-      toast.error('Failed to submit buy request');
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart. Please try again.');
     }
   };
 
@@ -332,13 +310,6 @@ function PetMarketplace() {
           )}
         </main>
       </div>
-      {showBuyForm && buyPet && (
-        <BuyRequestForm
-          product={buyPet}
-          onClose={handleBuyFormClose}
-          onSubmit={handleBuyFormSubmit}
-        />
-      )}
     </div>
   );
 }

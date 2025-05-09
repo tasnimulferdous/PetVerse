@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
+import PaymentAnimation from './components/PaymentAnimation';
 
 const MarketplaceCart = () => {
   const [cart, setCart] = useState({ cartItems: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const navigate = useNavigate();
 
   // Calculate cart totals
@@ -26,9 +29,9 @@ const MarketplaceCart = () => {
           return;
         }
 
-        const response = await fetch(getApiUrl('api/marketplace/cart'), {
+        const response = await fetch(getApiUrl(`api/marketplace/cart/${user._id || user.id}`), {
           headers: {
-            'Authorization': `Bearer ${user._id}`,
+            'Authorization': `Bearer ${user._id || user.id}`,
           },
         });
 
@@ -61,11 +64,12 @@ const MarketplaceCart = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user._id}`,
+          'Authorization': `Bearer ${user._id || user.id}`,
         },
         body: JSON.stringify({
           productId,
           qty,
+          userId: user._id || user.id
         }),
       });
 
@@ -90,10 +94,10 @@ const MarketplaceCart = () => {
         return;
       }
 
-      const response = await fetch(getApiUrl(`api/marketplace/cart/${productId}`), {
+      const response = await fetch(getApiUrl(`api/marketplace/cart/${user._id || user.id}/${productId}`), {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${user._id}`,
+          'Authorization': `Bearer ${user._id || user.id}`,
         },
       });
 
@@ -109,47 +113,60 @@ const MarketplaceCart = () => {
     }
   };
 
-  // Add to wishlist and remove from cart
-  const moveToWishlist = async (productId) => {
+  // Process payment
+  const processPayment = async () => {
     try {
+      setIsProcessingPayment(true);
+      setPaymentSuccess(false);
+      
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Show payment success animation
+      setPaymentSuccess(true);
+      
+      // Wait for success animation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Clear the cart after successful payment
       const user = JSON.parse(localStorage.getItem('loggedInUser'));
       if (!user) {
         navigate('/login');
         return;
       }
 
-      // Add to wishlist
-      const wishlistResponse = await fetch(getApiUrl('api/marketplace/wishlist'), {
+      // Clear the cart state first
+      setCart({ cartItems: [] });
+
+      // Then clear the cart on the server
+      const response = await fetch(getApiUrl(`api/marketplace/cart/${user._id || user.id}/clear`), {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user._id}`,
+          'Authorization': `Bearer ${user._id || user.id}`,
         },
-        body: JSON.stringify({
-          productId,
-        }),
       });
 
-      if (!wishlistResponse.ok) {
-        throw new Error('Failed to add to wishlist');
+      if (!response.ok) {
+        throw new Error('Failed to clear cart');
       }
 
-      // Remove from cart
-      await removeFromCart(productId);
-      alert('Item moved to wishlist!');
+      // Wait a bit before redirecting to show the success state
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Redirect to marketplace
+      navigate('/marketplace');
     } catch (error) {
-      console.error('Error moving to wishlist:', error);
-      alert('Failed to move to wishlist. Please try again.');
+      console.error('Error processing payment:', error);
+      setIsProcessingPayment(false);
+      setPaymentSuccess(false);
+      alert('Payment failed. Please try again.');
     }
-  };
-
-  // Checkout handler
-  const checkoutHandler = () => {
-    navigate('/marketplace/checkout');
   };
 
   return (
     <div className="dashboard-container">
+      <PaymentAnimation isProcessing={isProcessingPayment} isSuccess={paymentSuccess} />
+      
       <header className="dashboard-header">
         <h1>Your Cart</h1>
       </header>
@@ -223,35 +240,42 @@ const MarketplaceCart = () => {
                         </div>
                         <div className="cart-item-details">
                           <h3>{item.name}</h3>
-                          <p className="cart-item-price">${item.price.toFixed(2)}</p>
+                          <p className="cart-item-price">Unit Price: ${item.price.toFixed(2)}</p>
+                          <p className="cart-item-total">Total: ${(item.price * item.qty).toFixed(2)}</p>
                         </div>
                         <div className="cart-item-actions">
                           <div className="quantity-selector">
                             <button 
                               onClick={() => updateCartQuantity(item.product, Math.max(1, item.qty - 1))}
                               disabled={item.qty <= 1}
+                              className="quantity-btn"
                             >
                               <i className="fas fa-minus"></i>
                             </button>
-                            <span>{item.qty}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.qty}
+                              onChange={(e) => {
+                                const newQty = parseInt(e.target.value) || 1;
+                                updateCartQuantity(item.product, newQty);
+                              }}
+                              className="quantity-input"
+                            />
                             <button 
                               onClick={() => updateCartQuantity(item.product, item.qty + 1)}
+                              className="quantity-btn"
                             >
                               <i className="fas fa-plus"></i>
                             </button>
                           </div>
                           <div className="cart-item-buttons">
                             <button 
-                              onClick={() => moveToWishlist(item.product)}
-                              className="wishlist-button"
-                            >
-                              <i className="far fa-heart"></i>
-                            </button>
-                            <button 
                               onClick={() => removeFromCart(item.product)}
                               className="remove-button"
+                              title="Remove Item"
                             >
-                              <i className="fas fa-trash-alt"></i>
+                              <i className="fas fa-trash"></i>
                             </button>
                           </div>
                         </div>
@@ -261,34 +285,38 @@ const MarketplaceCart = () => {
                   
                   <div className="cart-summary">
                     <h3>Order Summary</h3>
-                    <div className="summary-item">
-                      <span>Items:</span>
-                      <span>${itemsPrice.toFixed(2)}</span>
+                    <div className="summary-items">
+                      {cart.cartItems.map((item) => (
+                        <div key={item.product} className="summary-item">
+                          <span>{item.name} x {item.qty}</span>
+                          <span>${(item.price * item.qty).toFixed(2)}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="summary-item">
-                      <span>Tax:</span>
-                      <span>${taxPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="summary-item">
-                      <span>Shipping:</span>
-                      <span>${shippingPrice.toFixed(2)}</span>
-                    </div>
-                    <div className="summary-item total">
-                      <span>Total:</span>
-                      <span>${totalPrice.toFixed(2)}</span>
+                    <div className="summary-totals">
+                      <div className="summary-item">
+                        <span>Subtotal:</span>
+                        <span>${itemsPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="summary-item">
+                        <span>Tax (15%):</span>
+                        <span>${taxPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="summary-item">
+                        <span>Shipping:</span>
+                        <span>${shippingPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="summary-item total">
+                        <span>Total:</span>
+                        <span>${totalPrice.toFixed(2)}</span>
+                      </div>
                     </div>
                     <button 
-                      onClick={checkoutHandler}
+                      onClick={processPayment}
                       className="checkout-button"
-                      disabled={cart.cartItems.length === 0}
+                      disabled={isProcessingPayment}
                     >
-                      Proceed to Checkout
-                    </button>
-                    <button 
-                      onClick={() => navigate('/marketplace')}
-                      className="continue-shopping"
-                    >
-                      Continue Shopping
+                      {isProcessingPayment ? 'Processing...' : 'Pay Now'}
                     </button>
                   </div>
                 </div>
