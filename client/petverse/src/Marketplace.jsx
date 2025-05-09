@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { getApiUrl } from './apiConfig';
 import axios from 'axios';
-import BuyRequestForm from './components/BuyRequestForm';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -15,8 +14,6 @@ const Marketplace = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOption, setSortOption] = useState('');
-  const [showBuyForm, setShowBuyForm] = useState(false);
-  const [buyProduct, setBuyProduct] = useState(null);
   const navigate = useNavigate();
 
   // Fetch products
@@ -47,7 +44,7 @@ const Marketplace = () => {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!user) return;
 
-        const response = await fetch(getApiUrl('api/marketplace/cart'), {
+        const response = await fetch(getApiUrl(`api/marketplace/cart/${user._id || user.id}`), {
           headers: {
             'Authorization': `Bearer ${user._id || user.id}`,
             'Content-Type': 'application/json',
@@ -88,6 +85,7 @@ const Marketplace = () => {
         body: JSON.stringify({
           productId: product._id,
           qty: 1,
+          userId: user._id || user.id
         }),
       });
 
@@ -105,56 +103,7 @@ const Marketplace = () => {
   };
 
   const handleBuyClick = (product) => {
-    setBuyProduct(product);
-    setShowBuyForm(true);
-  };
-
-  const handleBuyFormClose = () => {
-    setShowBuyForm(false);
-    setBuyProduct(null);
-  };
-
-  const handleBuyFormSubmit = async (formData) => {
-    try {
-      const user = JSON.parse(localStorage.getItem('loggedInUser'));
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-
-      const orderData = {
-        userId: user._id || user.id,
-        orderItems: [
-          {
-            name: buyProduct.name,
-            qty: 1,
-            image: buyProduct.image,
-            price: buyProduct.price,
-            product: buyProduct._id,
-          },
-        ],
-        shippingAddress: {
-          address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          country: formData.country,
-        },
-        paymentMethod: 'Direct',
-        taxPrice: 0,
-        shippingPrice: 0,
-        totalPrice: buyProduct.price,
-        isPaid: false,
-        isDelivered: false,
-      };
-
-      await axios.post(getApiUrl('api/marketplace/orders'), orderData, { withCredentials: true });
-      alert('Buy request submitted successfully');
-      setShowBuyForm(false);
-      setBuyProduct(null);
-    } catch (error) {
-      console.error('Error submitting buy request:', error);
-      alert('Failed to submit buy request');
-    }
+    addToCart(product);
   };
 
   // Filter and sort products
@@ -318,13 +267,6 @@ const Marketplace = () => {
           )}
         </main>
       </div>
-      {showBuyForm && buyProduct && (
-        <BuyRequestForm
-          product={buyProduct}
-          onClose={handleBuyFormClose}
-          onSubmit={handleBuyFormSubmit}
-        />
-      )}
     </div>
   );
 };

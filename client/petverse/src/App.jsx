@@ -51,6 +51,10 @@ function Navigation() {
                 <Link to="/adoption" className="nav-link" onClick={() => setMenuOpen(false)}>Adoption</Link>
                 <Link to="/marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Marketplace</Link>
                 <Link to="/pet-marketplace" className="nav-link" onClick={() => setMenuOpen(false)}>Pet Marketplace</Link>
+                <Link to="/marketplace/cart" className="nav-link" onClick={() => setMenuOpen(false)}>
+                  <i className="fas fa-shopping-cart" style={{ marginRight: '8px' }}></i>
+                  Cart
+                </Link>
                 <Link to="/adopt-message" className="nav-link" onClick={() => setMenuOpen(false)}>AdoptMessages</Link>
                 <Link to="/notifications" className="nav-link" onClick={() => setMenuOpen(false)}>Notification</Link>
                 <Link to="/profile" className="nav-link" onClick={() => setMenuOpen(false)}>Profile</Link>
