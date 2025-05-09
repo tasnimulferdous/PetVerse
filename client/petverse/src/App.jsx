@@ -31,7 +31,6 @@ function Navigation() {
     // Don't render navigation on specific pages
     if (location.pathname === '/adoption' || 
         location.pathname === '/adopt-message' || 
-        location.pathname === '/notifications') {
         return null;
     }
 
