@@ -1,8 +1,8 @@
 // API configuration
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const API_URL = import.meta.env.VITE_API_URL || 'https://petverse-backend.onrender.com';
 
 // Endpoints
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://petverse-backend.onrender.com';
 
 // AUTH ENDPOINTS
 export const LOGIN_URL = `${API_BASE_URL}/auth/login`;
